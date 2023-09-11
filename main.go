@@ -1,12 +1,10 @@
 package main
 
-//import (
-//	"github.com/daddvted/fruitninja"
-//)
+import (
+	"github.com/daddvted/fruitninja/fruitninja"
+)
 
 func main() {
-	//r := fruitninja.RouterSetup()
-	r := RouterSetup()
-
-	r.Run()
+	srv := fruitninja.EchoSetup()
+	srv.Logger.Fatal(srv.Start(":8080"))
 }

@@ -1,24 +1,26 @@
-package main
+package fruitninja
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
 
-	"github.com/gin-gonic/gin"
+	petname "github.com/dustinkirkland/golang-petname"
+	"github.com/labstack/echo/v4"
 )
 
-func RouterSetup() *gin.Engine {
-	r := gin.Default()
+func EchoSetup() *echo.Echo {
+	e := echo.New()
 
 	// r.GET("/:fruit/:count", func(ctx *gin.Context) {
-	r.GET("/", func(ctx *gin.Context) {
+	e.GET("/", func(c echo.Context) error {
 		var msg string
 
 		fruit := os.Getenv("FRUIT_NINJA_NAME")
-		fmt.Println(fruit)
 		count := os.Getenv("FRUIT_NINJA_COUNT")
+		name := petname.Generate(3, "_")
 
 		// fruit := ctx.Param("fruit")
 		cnt, err := strconv.Atoi(count)
@@ -48,8 +50,8 @@ func RouterSetup() *gin.Engine {
 			msg = "🐞"
 		}
 
-		ctx.String(200, msg)
+		return c.String(http.StatusOK, fmt.Sprintf("%s: %s\n", name, msg))
 	})
 
-	return r
+	return e
 }
