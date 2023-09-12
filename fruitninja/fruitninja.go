@@ -11,44 +11,46 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+var fruitMap = map[string]string{
+	"apple":      "🍎",
+	"banana":     "🍌",
+	"cherry":     "🍒",
+	"coconut":    "🥥",
+	"grape":      "🍇",
+	"kiwi":       "🥝",
+	"lemon":      "🍋",
+	"mango":      "🥭",
+	"orange":     "🍊",
+	"peach":      "🍑",
+	"pear":       "🍐",
+	"pineapple":  "🍍",
+	"strawberry": "🍓",
+	"tomato":     "🍅",
+	"watermelon": "🍉",
+	"default":    "🐞",
+}
+
 func EchoSetup() *echo.Echo {
 	e := echo.New()
 
-	// r.GET("/:fruit/:count", func(ctx *gin.Context) {
+	// e.Use(middleware.Logger())
+
 	e.GET("/", func(c echo.Context) error {
-		var msg string
 
 		fruit := os.Getenv("FRUIT_NINJA_NAME")
+		if strings.TrimSpace(fruit) == "" {
+			fruit = "default"
+		}
 		count := os.Getenv("FRUIT_NINJA_COUNT")
 		name := petname.Generate(3, "_")
 
-		// fruit := ctx.Param("fruit")
 		cnt, err := strconv.Atoi(count)
 		if err != nil {
 			fmt.Printf("%s: %s\n", "🐞", err.Error())
 			cnt = 1
 		}
 
-		switch fruit {
-		case "apple":
-			msg = strings.Repeat("🍎", cnt)
-		case "banana":
-			msg = strings.Repeat("🍌", cnt)
-		case "orange":
-			msg = strings.Repeat("🍊", cnt)
-		case "watermelon":
-			msg = strings.Repeat("🍉", cnt)
-		case "pear":
-			msg = strings.Repeat("🍐", cnt)
-		case "cherry":
-			msg = strings.Repeat("🍒", cnt)
-		case "strawberry":
-			msg = strings.Repeat("🍓", cnt)
-		case "kiwi":
-			msg = strings.Repeat("🥝", cnt)
-		default:
-			msg = "🐞"
-		}
+		msg := strings.Repeat(fruitMap[fruit], cnt)
 
 		return c.String(http.StatusOK, fmt.Sprintf("%s: %s\n", name, msg))
 	})
