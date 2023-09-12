@@ -14,8 +14,10 @@
 
 # Dependency directories (remove the comment below to include it)
 vendor/
-# Ignore tmp dir created by air
-tmp
 
 # Go workspace file
 go.work
+
+# Ignore tmp dir created by air
+tmp
+ninja
