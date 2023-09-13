@@ -30,7 +30,16 @@ var fruitMap = map[string]string{
 	"default":    "🐞",
 }
 
-func getFruit(c echo.Context) error {
+func getFruitHandler(c echo.Context) error {
+	fruit := os.Getenv("FRUIT_NINJA_NAME")
+	if strings.TrimSpace(fruit) == "" {
+		fruit = "default"
+	}
+	return c.String(http.StatusOK, fmt.Sprintf("%s\n", fruitMap[fruit]))
+
+}
+
+func getPlentyOfFruitHandler(c echo.Context) error {
 
 	fruit := os.Getenv("FRUIT_NINJA_NAME")
 	if strings.TrimSpace(fruit) == "" {
@@ -50,6 +59,20 @@ func getFruit(c echo.Context) error {
 	return c.String(http.StatusOK, fmt.Sprintf("%s: %s\n", name, msg))
 }
 
-func getBlade(c echo.Context) error {
-	return c.String(http.StatusOK, "hello ted")
+func getBladeHandler(c echo.Context) error {
+	fruits := strings.Split(c.Param("fruits"), "/")
+	// services := getK8SService("fruitninja")
+
+	// for _, fruit := range fruits {
+	// 	matched, found := getMatchedService(fruit, &services)
+
+	// 	if found {
+	// 		fmt.Printf("Matched service for %s is %s\n", fruit, matched)
+	// 	} else {
+	// 		fmt.Printf("Matched service for %s is not found\n", fruit)
+	// 	}
+	// }
+	getServingFruit("http://localhost:8080/")
+
+	return c.String(http.StatusOK, strings.Join(fruits, "->"))
 }
