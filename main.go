@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-	srv := fruitninja.EchoSetup()
+	srv := fruitninja.FruitninjaSetup()
 	srv.Logger.Fatal(srv.Start(":8080"))
 }
