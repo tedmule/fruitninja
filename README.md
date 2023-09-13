@@ -9,3 +9,9 @@ Use air to reload
 ```
 go install github.com/cosmtrek/air@latest
 ```
+
+# Build
+Build for alpine
+```
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ninja .
+```

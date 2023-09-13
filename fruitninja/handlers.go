@@ -63,18 +63,25 @@ func getBladeHandler(c echo.Context) error {
 	skewer := []string{}
 
 	fruits := strings.Split(c.Param("fruits"), "/")
-	// services := getK8SService("fruitninja")
+	services := getK8SService("fruitninja")
+	fmt.Println(services)
 
-	// for _, fruit := range fruits {
-	// 	matched, found := getMatchedService(fruit, &services)
+	for _, fruit := range fruits {
+		matched, found := getMatchedService(fruit, &services)
 
-	// 	if found {
-	// 		fmt.Printf("Matched service for %s is %s\n", fruit, matched)
-	// 	} else {
-	// 		fmt.Printf("Matched service for %s is not found\n", fruit)
-	// 	}
-	// }
-	fruitEmoji, ok := getServingFruit("http://localhost:8080/")
+		if found {
+			fmt.Printf("Matched service for %s is %s\n", fruit, matched)
+			url := "http://" + matched + ".fruitninja"
+			fruitEmoji, ok := getServingFruit(url)
+			if ok {
+				skewer = append(skewer, fruitEmoji)
+			} else {
+				skewer = append(skewer, fmt.Sprintf("[%s]", fruit))
+			}
+		} else {
+			skewer = append(skewer, fmt.Sprintf("[%s]", fruit))
+		}
+	}
 
-	return c.String(http.StatusOK, strings.Join(fruits, "->"))
+	return c.String(http.StatusOK, strings.Join(skewer, "->"))
 }

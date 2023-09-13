@@ -18,6 +18,11 @@ var config *rest.Config = &rest.Config{
 
 func getK8SService(namespace string) []string {
 	svcs := []string{}
+
+	// config, err := rest.InClusterConfig()
+	// if err != nil {
+	// 	panic(err.Error())
+	// }
 	// create the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
