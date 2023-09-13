@@ -67,15 +67,17 @@ func getBladeHandler(c echo.Context) error {
 	fmt.Println(services)
 
 	for _, fruit := range fruits {
-		matched, found := getMatchedService(fruit, &services)
+		matchedSvc, found := getMatchedService(fruit, &services)
 
 		if found {
-			fmt.Printf("Matched service for %s is %s\n", fruit, matched)
-			url := "http://" + matched + ".fruitninja"
+			fmt.Printf("Matched service for %s is %s\n", fruit, matchedSvc)
+			url := "http://" + matchedSvc + ".fruitninja"
 			fruitEmoji, ok := getServingFruit(url)
 			if ok {
-				skewer = append(skewer, fruitEmoji)
+				skewer = append(skewer, strings.TrimSpace(fruitEmoji))
 			} else {
+				// Enclose fruit with square bracket,
+				// when fruit emoji not return successfully.
 				skewer = append(skewer, fmt.Sprintf("[%s]", fruit))
 			}
 		} else {
