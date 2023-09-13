@@ -60,6 +60,8 @@ func getPlentyOfFruitHandler(c echo.Context) error {
 }
 
 func getBladeHandler(c echo.Context) error {
+	skewer := []string{}
+
 	fruits := strings.Split(c.Param("fruits"), "/")
 	// services := getK8SService("fruitninja")
 
@@ -72,7 +74,7 @@ func getBladeHandler(c echo.Context) error {
 	// 		fmt.Printf("Matched service for %s is not found\n", fruit)
 	// 	}
 	// }
-	getServingFruit("http://localhost:8080/")
+	fruitEmoji, ok := getServingFruit("http://localhost:8080/")
 
 	return c.String(http.StatusOK, strings.Join(fruits, "->"))
 }
