@@ -3,8 +3,10 @@ module github.com/daddvted/fruitninja
 go 1.21.0
 
 require (
+	github.com/caarlos0/env/v9 v9.0.0
 	github.com/dustinkirkland/golang-petname v0.0.0-20230626224747-e794b9370d49
 	github.com/labstack/echo/v4 v4.11.1
+	github.com/sirupsen/logrus v1.9.3
 	k8s.io/apimachinery v0.28.1
 	k8s.io/client-go v0.28.1
 )

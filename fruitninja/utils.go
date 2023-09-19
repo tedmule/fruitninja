@@ -8,8 +8,6 @@ import (
 )
 
 func getMatchedService(name string, services *[]string) (string, bool) {
-	fmt.Println(services)
-
 	for _, service := range *services {
 		if strings.Contains(service, name) {
 			return service, true

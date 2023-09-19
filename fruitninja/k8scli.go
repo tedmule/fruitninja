@@ -10,15 +10,8 @@ import (
 func getK8SService(namespace string) []string {
 	svcs := []string{}
 
-	// config, err := rest.InClusterConfig()
-	// if err != nil {
-	// 	fmt.Println("===============================")
-	// 	fmt.Println("error")
-	// 	// panic(err.Error())
-	// }
-
 	// create the clientset
-	clientset, err := kubernetes.NewForConfig(config)
+	clientset, err := kubernetes.NewForConfig(k8sConfig)
 	if err != nil {
 		panic(err.Error())
 	}
