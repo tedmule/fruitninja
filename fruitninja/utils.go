@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -28,4 +29,12 @@ func getServingFruit(url string) (string, bool) {
 		fmt.Printf("%+v\n", err)
 	}
 	return string(body), true
+}
+
+func getNamespace() (string, error) {
+	namespace, err := os.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+	if err != nil {
+		return "", err
+	}
+	return string(namespace), nil
 }

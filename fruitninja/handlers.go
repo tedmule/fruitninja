@@ -45,7 +45,7 @@ func getBladeHandler(c echo.Context) error {
 	skewer := []string{}
 
 	fruits := strings.Split(c.Param("fruits"), "/")
-	services := getK8SService("fruitninja")
+	services := getK8SService()
 
 	for _, fruit := range fruits {
 		matchedSvc, found := getMatchedService(fruit, &services)
