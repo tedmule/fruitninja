@@ -50,7 +50,8 @@ func getFruitHandler(c echo.Context) error {
 	skewer := []string{}
 	skewer = append(skewer, fruitMap[fruitNinjaConfig.Name])
 	ns := getNamespace()
-	urlRemainder := "/"
+	// urlRemainder := "/"
+	var urlRemainder, serviceURL string
 
 	for serviceLength > 1 {
 		time.Sleep(1 * time.Second)
@@ -58,11 +59,13 @@ func getFruitHandler(c echo.Context) error {
 		nextService := splitedURL[0]
 		if serviceLength > 1 {
 			urlRemainder = splitedURL[1]
+			serviceURL = "http://" + nextService + "." + ns + ".svc.cluster.local/" + urlRemainder
+		} else {
+			serviceURL = "http://" + nextService + "." + ns + ".svc.cluster.local/"
 		}
 		fmt.Printf("next service: %s\n", nextService)
 		fmt.Printf("url remainder: %s\n", urlRemainder)
 
-		serviceURL := "http://" + nextService + "." + ns + ".svc.cluster.local/" + urlRemainder
 		fmt.Printf("next service url: %s\n", serviceURL)
 
 		fruitEmoji, ok := getServingFruit(serviceURL)
