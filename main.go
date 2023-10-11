@@ -35,6 +35,7 @@ func init() {
 		logLvl = log.DebugLevel
 	}
 	log.SetLevel(logLvl)
+	log.SetReportCaller(true)
 }
 
 func main() {

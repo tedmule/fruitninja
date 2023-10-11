@@ -31,7 +31,48 @@ var fruitMap = map[string]string{
 
 func getFruitHandler(c echo.Context) error {
 	log.Infof("Request for [%s] service\n", fruitNinjaConfig.Name)
-	return c.String(http.StatusOK, fmt.Sprintf("%s\n", fruitMap[fruitNinjaConfig.Name]))
+	url := c.Request().URL.Path
+	fmt.Println(url)
+	// currentNS := getNamespace()
+	// fmt.Printf("Current namespace: %s\n", currentNS)
+	// fmt.Println(strings.SplitN(strings.Trim(url, "/"), "/", 2))
+	splitedURL := strings.SplitN(strings.Trim(url, "/"), "/", 2)
+	serviceLength := len(splitedURL)
+	fmt.Printf("START LENGTH: %d\n", serviceLength)
+	skewer := []string{}
+	skewer = append(skewer, fruitMap[fruitNinjaConfig.Name])
+	ns := getNamespace()
+
+	for serviceLength > 1 {
+		urlRemainder := splitedURL[1]
+		nextService := splitedURL[0]
+		fmt.Printf("url remainder: %s\n", urlRemainder)
+		fmt.Printf("Next service: %s\n", nextService)
+
+		serviceURL := "http://" + nextService + "." + ns + ".svc.cluster.local/" + urlRemainder
+		fmt.Printf("next service url: %s\n", serviceURL)
+
+		fruitEmoji, ok := getServingFruit(serviceURL)
+		fmt.Printf("OK: %t\n", ok)
+		if ok {
+			// skewer = append(skewer, strings.TrimSpace(fruitEmoji))
+			fmt.Println(fruitEmoji)
+			skewer = append(skewer, strings.TrimSpace(fruitEmoji))
+			// return c.String(http.StatusOK, fmt.Sprintf("%s->%s\n", fruitMap[fruitNinjaConfig.Name], fruitEmoji))
+		} else {
+			// Enclose fruit with square bracket,
+			// when fruit emoji not return successfully.
+			skewer = append(skewer, fmt.Sprintf("[%s]", nextService))
+			splitedURL = strings.SplitN(strings.Trim(urlRemainder, "/"), "/", 2)
+			serviceLength = len(splitedURL)
+			fmt.Printf("service LENGTH: %d\n", serviceLength)
+		}
+
+	}
+	bladeString := strings.Join(skewer, "->")
+	// return c.String(http.StatusOK, strings.Join(skewer, "->"))
+	return c.String(http.StatusOK, fmt.Sprintf("%s\n", bladeString))
+
 }
 
 func getPlentyOfFruitHandler(c echo.Context) error {
@@ -46,6 +87,7 @@ func getBladeHandler(c echo.Context) error {
 
 	fruits := strings.Split(c.Param("fruits"), "/")
 	services := getK8SService()
+	log.Debug(services)
 
 	for _, fruit := range fruits {
 		matchedSvc, found := getMatchedService(fruit, &services)
@@ -66,5 +108,7 @@ func getBladeHandler(c echo.Context) error {
 		}
 	}
 
-	return c.String(http.StatusOK, strings.Join(skewer, "->"))
+	bladeString := strings.Join(skewer, "->")
+	// return c.String(http.StatusOK, strings.Join(skewer, "->"))
+	return c.String(http.StatusOK, fmt.Sprintf("%s\n", bladeString))
 }
