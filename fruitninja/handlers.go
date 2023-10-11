@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/labstack/echo/v4"
@@ -33,27 +34,38 @@ func getFruitHandler(c echo.Context) error {
 	log.Infof("Request for [%s] service\n", fruitNinjaConfig.Name)
 	url := c.Request().URL.Path
 	fmt.Println(url)
+
+	if strings.TrimSpace(url) == "/" {
+		return c.String(http.StatusOK, fmt.Sprintf("%s\n", fruitMap[fruitNinjaConfig.Name]))
+	}
+
 	// currentNS := getNamespace()
 	// fmt.Printf("Current namespace: %s\n", currentNS)
 	// fmt.Println(strings.SplitN(strings.Trim(url, "/"), "/", 2))
 	splitedURL := strings.SplitN(strings.Trim(url, "/"), "/", 2)
+	// splitedURL := strings.SplitN(url, "/", 2)
+	fmt.Printf("splited url: %+v\n", splitedURL)
 	serviceLength := len(splitedURL)
 	fmt.Printf("START LENGTH: %d\n", serviceLength)
 	skewer := []string{}
 	skewer = append(skewer, fruitMap[fruitNinjaConfig.Name])
 	ns := getNamespace()
+	urlRemainder := "/"
 
 	for serviceLength > 1 {
-		urlRemainder := splitedURL[1]
+		time.Sleep(1 * time.Second)
+
 		nextService := splitedURL[0]
+		if serviceLength > 1 {
+			urlRemainder = splitedURL[1]
+		}
+		fmt.Printf("next service: %s\n", nextService)
 		fmt.Printf("url remainder: %s\n", urlRemainder)
-		fmt.Printf("Next service: %s\n", nextService)
 
 		serviceURL := "http://" + nextService + "." + ns + ".svc.cluster.local/" + urlRemainder
 		fmt.Printf("next service url: %s\n", serviceURL)
 
 		fruitEmoji, ok := getServingFruit(serviceURL)
-		fmt.Printf("OK: %t\n", ok)
 		if ok {
 			// skewer = append(skewer, strings.TrimSpace(fruitEmoji))
 			fmt.Println(fruitEmoji)
@@ -63,9 +75,30 @@ func getFruitHandler(c echo.Context) error {
 			// Enclose fruit with square bracket,
 			// when fruit emoji not return successfully.
 			skewer = append(skewer, fmt.Sprintf("[%s]", nextService))
-			splitedURL = strings.SplitN(strings.Trim(urlRemainder, "/"), "/", 2)
+			// splitedURL = strings.SplitN(strings.Trim(urlRemainder, "/"), "/", 2)
+			splitedURL = strings.SplitN(urlRemainder, "/", 2)
+			fmt.Printf("splited url: %+v\n", splitedURL)
 			serviceLength = len(splitedURL)
 			fmt.Printf("service LENGTH: %d\n", serviceLength)
+		}
+
+	}
+
+	if serviceLength == 1 {
+		urlRemainder = "/"
+		nextService := splitedURL[0]
+		serviceURL := "http://" + nextService + "." + ns + ".svc.cluster.local/" + urlRemainder
+		fmt.Printf("next service url: %s\n", serviceURL)
+		fruitEmoji, ok := getServingFruit(serviceURL)
+		if ok {
+			// skewer = append(skewer, strings.TrimSpace(fruitEmoji))
+			fmt.Println(fruitEmoji)
+			skewer = append(skewer, strings.TrimSpace(fruitEmoji))
+			// return c.String(http.StatusOK, fmt.Sprintf("%s->%s\n", fruitMap[fruitNinjaConfig.Name], fruitEmoji))
+		} else {
+			// Enclose fruit with square bracket,
+			// when fruit emoji not return successfully.
+			skewer = append(skewer, fmt.Sprintf("[%s]", nextService))
 		}
 
 	}
