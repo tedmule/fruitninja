@@ -65,7 +65,6 @@ func getFruitHandler(c echo.Context) error {
 		}
 		fmt.Printf("next service: %s\n", nextService)
 		fmt.Printf("url remainder: %s\n", urlRemainder)
-
 		fmt.Printf("next service url: %s\n", serviceURL)
 
 		fruitEmoji, ok := getServingFruit(serviceURL)
@@ -76,7 +75,6 @@ func getFruitHandler(c echo.Context) error {
 			// Enclose fruit with square bracket,
 			// when fruit emoji not return successfully.
 			skewer = append(skewer, fmt.Sprintf("[%s]", nextService))
-			// splitedURL = strings.SplitN(strings.Trim(urlRemainder, "/"), "/", 2)
 			splitedURL = strings.SplitN(urlRemainder, "/", 2)
 			fmt.Printf("splited url: %+v\n", splitedURL)
 			serviceLength = len(splitedURL)
@@ -86,16 +84,14 @@ func getFruitHandler(c echo.Context) error {
 	}
 
 	if serviceLength == 1 {
-		urlRemainder = "/"
 		nextService := splitedURL[0]
-		serviceURL := "http://" + nextService + "." + ns + ".svc.cluster.local/" + urlRemainder
+		serviceURL := "http://" + nextService + "." + ns + ".svc.cluster.local/"
 		fmt.Printf("next service url: %s\n", serviceURL)
 		fruitEmoji, ok := getServingFruit(serviceURL)
 		if ok {
 			// skewer = append(skewer, strings.TrimSpace(fruitEmoji))
 			fmt.Println(fruitEmoji)
 			skewer = append(skewer, strings.TrimSpace(fruitEmoji))
-			// return c.String(http.StatusOK, fmt.Sprintf("%s->%s\n", fruitMap[fruitNinjaConfig.Name], fruitEmoji))
 		} else {
 			// Enclose fruit with square bracket,
 			// when fruit emoji not return successfully.
