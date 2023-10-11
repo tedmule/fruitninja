@@ -67,10 +67,8 @@ func getFruitHandler(c echo.Context) error {
 
 		fruitEmoji, ok := getServingFruit(serviceURL)
 		if ok {
-			// skewer = append(skewer, strings.TrimSpace(fruitEmoji))
-			fmt.Println(fruitEmoji)
 			skewer = append(skewer, strings.TrimSpace(fruitEmoji))
-			// return c.String(http.StatusOK, fmt.Sprintf("%s->%s\n", fruitMap[fruitNinjaConfig.Name], fruitEmoji))
+			break
 		} else {
 			// Enclose fruit with square bracket,
 			// when fruit emoji not return successfully.
