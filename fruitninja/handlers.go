@@ -26,6 +26,7 @@ var fruitMap = map[string]string{
 	"strawberry": "🍓",
 	"tomato":     "🍅",
 	"watermelon": "🍉",
+	"blade":      "🔪",
 	"default":    "🐞",
 }
 
@@ -131,6 +132,6 @@ func getBladeHandler(c echo.Context) error {
 	if ok {
 		return c.String(http.StatusOK, fruitEmoji)
 	} else {
-		return c.String(http.StatusOK, fruitMap[fruitNinjaConfig.Name])
+		return c.String(400, fmt.Sprintf("%s\n", fruitMap["blade"]))
 	}
 }
