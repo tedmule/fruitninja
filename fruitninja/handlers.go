@@ -108,32 +108,29 @@ func getPlentyOfFruitHandler(c echo.Context) error {
 }
 
 func getBladeHandler(c echo.Context) error {
-	skewer := []string{}
+	url := c.Request().URL.Path
+	log.Debugf("Request URL: %s\n", url)
+	queryStr := c.Param("fruits")
+	log.Debugf("Query string: %s\n", queryStr)
 
-	fruits := strings.Split(c.Param("fruits"), "/")
-	services := getK8SService()
-	log.Debug(services)
+	splitedURL := strings.SplitN(strings.Trim(queryStr, "/"), "/", 2)
+	log.Debugf("Splited URL: %q\n", splitedURL)
+	fruitNO := len(splitedURL)
+	log.Debugf("No of fruits: %d\n", fruitNO)
+	ns := getNamespace()
 
-	for _, fruit := range fruits {
-		matchedSvc, found := getMatchedService(fruit, &services)
+	var serviceURL string
 
-		if found {
-			log.Infof("Matched service for %s is %s\n", fruit, matchedSvc)
-			url := "http://" + matchedSvc + ".fruitninja"
-			fruitEmoji, ok := getServingFruit(url)
-			if ok {
-				skewer = append(skewer, strings.TrimSpace(fruitEmoji))
-			} else {
-				// Enclose fruit with square bracket,
-				// when fruit emoji not return successfully.
-				skewer = append(skewer, fmt.Sprintf("[%s]", fruit))
-			}
-		} else {
-			skewer = append(skewer, fmt.Sprintf("[%s]", fruit))
-		}
+	if fruitNO > 1 {
+		serviceURL = "http://" + splitedURL[0] + "." + ns + ".svc.cluster.local/" + splitedURL[1]
+	} else {
+		// If serviceLength == 1, no need to append urlRemainder
+		serviceURL = "http://" + splitedURL[0] + "." + ns + ".svc.cluster.local/"
 	}
-
-	bladeString := strings.Join(skewer, "->")
-	// return c.String(http.StatusOK, strings.Join(skewer, "->"))
-	return c.String(http.StatusOK, fmt.Sprintf("%s\n", bladeString))
+	fruitEmoji, ok := getServingFruit(serviceURL)
+	if ok {
+		return c.String(http.StatusOK, fruitEmoji)
+	} else {
+		return c.String(http.StatusOK, fruitMap[fruitNinjaConfig.Name])
+	}
 }
