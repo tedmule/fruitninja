@@ -44,7 +44,7 @@ func getFruitHandler(c echo.Context) error {
 
 	skewer := []string{}
 	// Append itself to skewer
-	// skewer = append(skewer, fruitMap[fruitNinjaConfig.Name])
+	skewer = append(skewer, fruitMap[fruitNinjaConfig.Name])
 	ns := getNamespace()
 
 	var urlRemainder, serviceURL string
