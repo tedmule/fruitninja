@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/labstack/echo/v4"
@@ -33,39 +32,35 @@ var fruitMap = map[string]string{
 func getFruitHandler(c echo.Context) error {
 	log.Infof("Request for [%s] service\n", fruitNinjaConfig.Name)
 	url := c.Request().URL.Path
-	fmt.Println(url)
+	log.Debugf("Request URL: %s\n", url)
 
 	if strings.TrimSpace(url) == "/" {
 		return c.String(http.StatusOK, fmt.Sprintf("%s\n", fruitMap[fruitNinjaConfig.Name]))
 	}
 
-	// currentNS := getNamespace()
-	// fmt.Printf("Current namespace: %s\n", currentNS)
-	// fmt.Println(strings.SplitN(strings.Trim(url, "/"), "/", 2))
 	splitedURL := strings.SplitN(strings.Trim(url, "/"), "/", 2)
-	// splitedURL := strings.SplitN(url, "/", 2)
-	fmt.Printf("splited url: %+v\n", splitedURL)
 	serviceLength := len(splitedURL)
-	fmt.Printf("START LENGTH: %d\n", serviceLength)
+	log.Debugf("Splited URL length: %d\n", serviceLength)
+
 	skewer := []string{}
-	skewer = append(skewer, fruitMap[fruitNinjaConfig.Name])
+	// Append itself to skewer
+	// skewer = append(skewer, fruitMap[fruitNinjaConfig.Name])
 	ns := getNamespace()
-	// urlRemainder := "/"
+
 	var urlRemainder, serviceURL string
 
 	for serviceLength > 1 {
-		time.Sleep(1 * time.Second)
-
 		nextService := splitedURL[0]
 		if serviceLength > 1 {
 			urlRemainder = splitedURL[1]
 			serviceURL = "http://" + nextService + "." + ns + ".svc.cluster.local/" + urlRemainder
 		} else {
+			// If serviceLength == 1, no need to append urlRemainder
 			serviceURL = "http://" + nextService + "." + ns + ".svc.cluster.local/"
 		}
-		fmt.Printf("next service: %s\n", nextService)
-		fmt.Printf("url remainder: %s\n", urlRemainder)
-		fmt.Printf("next service url: %s\n", serviceURL)
+		log.Debugf("Next service: %s\n", nextService)
+		log.Debugf("URL remainder: %s\n", urlRemainder)
+		log.Debugf("Next service url: %s\n", serviceURL)
 
 		fruitEmoji, ok := getServingFruit(serviceURL)
 		if ok {
