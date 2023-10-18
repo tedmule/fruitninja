@@ -48,7 +48,7 @@ func FruitninjaSetup(config *FruitNinjaConfig) *echo.Echo {
 	}))
 
 	e.GET("/*", getFruitHandler)
-	e.GET("/plenty", getPlentyOfFruitHandler)
+	e.GET("/jabber", getJabberHandler)
 	e.GET("/blade/:fruits", getBladeHandler)
 
 	return e

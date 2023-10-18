@@ -36,7 +36,8 @@ func getFruitHandler(c echo.Context) error {
 	log.Debugf("Request URL: %s\n", url)
 
 	if strings.TrimSpace(url) == "/" {
-		return c.String(http.StatusOK, fmt.Sprintf("%s\n", fruitMap[fruitNinjaConfig.Name]))
+		msg := strings.Repeat(fruitMap[fruitNinjaConfig.Name], fruitNinjaConfig.Count)
+		return c.String(http.StatusOK, fmt.Sprintf("%s\n", msg))
 	}
 
 	splitedURL := strings.SplitN(strings.Trim(url, "/"), "/", 2)
@@ -101,7 +102,7 @@ func getFruitHandler(c echo.Context) error {
 
 }
 
-func getPlentyOfFruitHandler(c echo.Context) error {
+func getJabberHandler(c echo.Context) error {
 	name := petname.Generate(3, "_")
 	msg := strings.Repeat(fruitMap[fruitNinjaConfig.Name], fruitNinjaConfig.Count)
 
