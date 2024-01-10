@@ -2,35 +2,25 @@ package fruitninja
 
 import (
 	"fmt"
+	"html/template"
+	"io"
 	"net/http"
 	"strings"
 
-	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/net/websocket"
 )
 
-var fruitMap = map[string]string{
-	"apple":      "🍎",
-	"banana":     "🍌",
-	"cherry":     "🍒",
-	"coconut":    "🥥",
-	"grape":      "🍇",
-	"kiwi":       "🥝",
-	"lemon":      "🍋",
-	"mango":      "🥭",
-	"orange":     "🍊",
-	"peach":      "🍑",
-	"pear":       "🍐",
-	"pineapple":  "🍍",
-	"strawberry": "🍓",
-	"tomato":     "🍅",
-	"watermelon": "🍉",
-	"blade":      "🔪",
-	"default":    "🐞",
+type Template struct {
+	templates *template.Template
 }
 
-func getFruitHandler(c echo.Context) error {
+func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
+}
+
+func getK8sFruitHandler(c echo.Context) error {
 	log.Infof("Request for [%s] service\n", fruitNinjaConfig.Name)
 	url := c.Request().URL.Path
 	log.Debugf("Request URL: %s\n", url)
@@ -99,17 +89,9 @@ func getFruitHandler(c echo.Context) error {
 	bladeString := strings.Join(skewer, "->")
 	// return c.String(http.StatusOK, strings.Join(skewer, "->"))
 	return c.String(http.StatusOK, fmt.Sprintf("%s\n", bladeString))
-
 }
 
-func getJabberHandler(c echo.Context) error {
-	name := petname.Generate(3, "_")
-	msg := strings.Repeat(fruitMap[fruitNinjaConfig.Name], fruitNinjaConfig.Count)
-
-	return c.String(http.StatusOK, fmt.Sprintf("%s: %s\n", name, msg))
-}
-
-func getBladeHandler(c echo.Context) error {
+func getK8sBladeHandler(c echo.Context) error {
 	url := c.Request().URL.Path
 	log.Debugf("Request URL: %s\n", url)
 	queryStr := c.Param("fruits")
@@ -135,4 +117,31 @@ func getBladeHandler(c echo.Context) error {
 	} else {
 		return c.String(400, fmt.Sprintf("%s\n", fruitMap["blade"]))
 	}
+}
+
+func getJabberHandler(c echo.Context) error {
+	return c.String(http.StatusOK, fmt.Sprintf("%s\n", generateJabber()))
+}
+
+func wsHandler(c echo.Context) error {
+	websocket.Handler(func(ws *websocket.Conn) {
+		defer ws.Close()
+		msg := "Welcom to FruitNinja"
+		for {
+			// Write
+			err := websocket.Message.Send(ws, msg)
+			if err != nil {
+				log.Error(err)
+			}
+
+			// Read
+			err = websocket.Message.Receive(ws, &msg)
+			if err != nil {
+				log.Error(err)
+			}
+			fmt.Printf("received %s from client\n", msg)
+			msg = fruitMap[msg]
+		}
+	}).ServeHTTP(c.Response(), c.Request())
+	return nil
 }

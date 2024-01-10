@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>FruitNinja</title>
+</head>
+
+<body>
+  <p id="output"></p>
+
+  <script>
+    const fruits = [
+      "apple", "banana", "cherry", "coconut", "grape", "kiwi",
+	    "lemon", "mango", "orange", "peach", "pear", "pineapple",
+	    "strawberry", "tomato", "watermelon", "blade"
+    ]
+
+    function randomChoice(list) {
+      const randomIndex = Math.floor(Math.random() * list.length)
+      return list[randomIndex]
+    }
+
+    function connectWebSocket() {
+      var loc = window.location;
+      var scheme = 'ws';
+
+      if (loc.protocol === 'https:') {
+        scheme = 'wss';
+      }
+
+      const uri = `${scheme}://${loc.host}${loc.pathname}ws`
+      ws = new WebSocket(uri)
+
+      ws.onopen = function() {
+        console.log('Connected')
+      }
+
+      ws.onmessage = function(event) {
+        var out = document.getElementById('output');
+        out.innerHTML += event.data + '<br>';
+      }
+
+      ws.onerror = function(event) {
+        console.log("Shit! ws error:", event.data);
+      }
+      ws.onclose = function(event) {
+        console.log("reconnect:", event)
+        setTimeout(connectWebSocket, 2000);
+      }
+
+      setInterval(function() {
+        let fruit = randomChoice(fruits)
+        console.log(`send ${fruit} to server`)
+        ws.send(fruit);
+      }, 1000);
+    }
+
+    connectWebSocket();
+  </script>
+</body>
+
+</html>

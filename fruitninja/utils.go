@@ -7,8 +7,29 @@ import (
 	"os"
 	"strings"
 
+	petname "github.com/dustinkirkland/golang-petname"
 	log "github.com/sirupsen/logrus"
 )
+
+var fruitMap = map[string]string{
+	"apple":      "🍎",
+	"banana":     "🍌",
+	"cherry":     "🍒",
+	"coconut":    "🥥",
+	"grape":      "🍇",
+	"kiwi":       "🥝",
+	"lemon":      "🍋",
+	"mango":      "🥭",
+	"orange":     "🍊",
+	"peach":      "🍑",
+	"pear":       "🍐",
+	"pineapple":  "🍍",
+	"strawberry": "🍓",
+	"tomato":     "🍅",
+	"watermelon": "🍉",
+	"blade":      "🔪",
+	"default":    "🐞",
+}
 
 func getMatchedService(name string, services *[]string) (string, bool) {
 	for _, service := range *services {
@@ -57,5 +78,11 @@ func getHostname() string {
 	} else {
 		return name
 	}
+}
 
+func generateJabber() string {
+	name := petname.Generate(fruitNinjaConfig.Length, "_")
+	msg := strings.Repeat(fruitMap[fruitNinjaConfig.Name], fruitNinjaConfig.Count)
+
+	return fmt.Sprintf("%s: %s", name, msg)
 }

@@ -8,6 +8,9 @@ import (
 )
 
 type FruitNinjaConfig struct {
+	// Context    string `env:"FRUIT_NINJA_CONTEXT" envDefault:""`
+	Mode       string `env:"FRUIT_NINJA_MODE" envDefault:"default"`
+	Length     int    `env:"FRUIT_NINJA_JABBER_WORD" envDefault:"2"`
 	Name       string `env:"FRUIT_NINJA_NAME" envDefault:"default"`
 	Count      int    `env:"FRUIT_NINJA_COUNT" envDefault:"1"`
 	LogLevel   string `env:"FRUIT_NINJA_LOG_LEVEL" envDefault:"debug"`
@@ -47,9 +50,15 @@ func FruitninjaSetup(config *FruitNinjaConfig) *echo.Echo {
 		},
 	}))
 
-	e.GET("/*", getFruitHandler)
-	e.GET("/jabber", getJabberHandler)
-	e.GET("/blade/:fruits", getBladeHandler)
+	if config.Mode == "k8s" {
+		e.GET("/*", getK8sFruitHandler)
+		e.GET("/blade/:fruits", getK8sBladeHandler)
+
+	} else {
+		e.File("/", "static/html/index.html")
+		e.GET("/jabber", getJabberHandler)
+		e.GET("/ws", wsHandler)
+	}
 
 	return e
 }
