@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/caarlos0/env/v9"
+	"github.com/daddvted/fruitninja/data"
 	"github.com/daddvted/fruitninja/fruitninja"
 	log "github.com/sirupsen/logrus"
 )
@@ -39,6 +40,12 @@ func init() {
 }
 
 func main() {
-	srv := fruitninja.FruitninjaSetup(&appConfig)
+	redis, err := data.NewRedisClient("localhost:2379")
+	if err != nil {
+		fmt.Println(err)
+		log.Errorf("Failed to connect to Redis: %s", err.Error())
+	}
+	srv := fruitninja.FruitninjaSetup(&appConfig, redis)
+	log.Infof("Fruitninja runs in %s mode.", appConfig.Mode)
 	srv.Logger.Fatal(srv.Start(":8080"))
 }

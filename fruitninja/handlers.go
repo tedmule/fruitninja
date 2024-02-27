@@ -120,7 +120,12 @@ func getK8sBladeHandler(c echo.Context) error {
 }
 
 func getJabberHandler(c echo.Context) error {
-	return c.String(http.StatusOK, fmt.Sprintf("%s\n", generateJabber()))
+	var cacheText string
+	if redisCache == nil {
+		cacheText = "Redis: failed to connect to redis"
+	}
+	// fmt.Printf("----------------: %s\n", redisCache.GetKey("fruits"))
+	return c.String(http.StatusOK, fmt.Sprintf("%s\n%s\n", generateJabber(), cacheText))
 }
 
 func wsHandler(c echo.Context) error {

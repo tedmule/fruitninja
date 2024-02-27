@@ -5,14 +5,18 @@ go 1.20
 require (
 	github.com/caarlos0/env/v9 v9.0.0
 	github.com/dustinkirkland/golang-petname v0.0.0-20230626224747-e794b9370d49
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/sirupsen/logrus v1.9.3
+	golang.org/x/net v0.13.0
 	k8s.io/apimachinery v0.28.1
 	k8s.io/client-go v0.28.1
 )
 
 require (
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
@@ -37,7 +41,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	golang.org/x/crypto v0.11.0 // indirect
-	golang.org/x/net v0.13.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
 	golang.org/x/term v0.10.0 // indirect

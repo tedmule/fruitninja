@@ -1,6 +1,9 @@
 package fruitninja
 
 import (
+	"fmt"
+
+	"github.com/daddvted/fruitninja/data"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	log "github.com/sirupsen/logrus"
@@ -19,12 +22,22 @@ type FruitNinjaConfig struct {
 	Token      string `env:"FRUIT_NINJA_TOKEN" envDefault:"eyJhbGciOiJSUzI1NiIsImtpZCI6InRBb1JyNzRaa3VYZmV6cmk4bHZybGJZcjVpOGN4cDhCSEtCdEJQMnp1RWMifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZXYiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoiZGV2LWNvbnRhaW5lci1zZWNyZXQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGV2LWNvbnRhaW5lci1zYSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjExMWY0OGRmLTFkYWEtNDljOS1hMzIzLTI0Nzc3ZWE0Y2U0ZCIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZXY6ZGV2LWNvbnRhaW5lci1zYSJ9.o0ZKu_ziOO3-GJ_kzYDnNq3UslhjRkue0TJWFAC9wgAgndhQi37r6-HwtMx3syHnC8Q5sNdG_Df0vYAKSH5PjgA2RqbMIoOWUwRxEDIwNBHHZ9xJrOu4gCZoxWqHgBskmjsqE5zVw5D6ksltAEZKFke15t2NlYuiiaz1Mj9mcEdUk7ryo5Z18VGKe6lsdbqfu_6GkUvN5NvzvoZcSrnc6VTGxuBV_c1Mfhk0lJpIlzEZjjDCpi6w-V3aH1oIJE5xmBxSOo9i8GRCV1SmEMsOErF9Qsc2QRwIiuIe4R4ALS-xSxqbrDBEAnI95feZDlsJU8yrqMsm0zxpkpHWSHQ13Q"`
 }
 
-var k8sConfig *rest.Config
+var (
+	k8sConfig *rest.Config
 
-var fruitNinjaConfig FruitNinjaConfig
+	fruitNinjaConfig FruitNinjaConfig
+	redisCache       *data.Cache
+)
 
-func FruitninjaSetup(config *FruitNinjaConfig) *echo.Echo {
+func FruitninjaSetup(config *FruitNinjaConfig, cache *data.Cache) *echo.Echo {
 	fruitNinjaConfig = *config
+	redisCache = cache
+
+	if cache != nil {
+		fmt.Println("cache")
+	} else {
+		fmt.Println("no cache")
+	}
 
 	e := echo.New()
 
@@ -50,6 +63,7 @@ func FruitninjaSetup(config *FruitNinjaConfig) *echo.Echo {
 		},
 	}))
 
+	// "k8s" mode is used for service mesh demo
 	if config.Mode == "k8s" {
 		e.GET("/*", getK8sFruitHandler)
 		e.GET("/blade/:fruits", getK8sBladeHandler)
