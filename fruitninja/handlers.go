@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/daddvted/fruitninja/data"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/websocket"
@@ -120,11 +121,22 @@ func getK8sBladeHandler(c echo.Context) error {
 }
 
 func getJabberHandler(c echo.Context) error {
+	redisCache.ListKeys()
 	var cacheText string
 	if redisCache == nil {
+		// Try to connect Redis again.
 		cacheText = "Redis: failed to connect to redis"
+		redis, err := data.NewRedisClient(fruitNinjaConfig.RedisAddr)
+		if err != nil {
+			log.Errorf("Failed to connect to Redis: %s", err.Error())
+		} else {
+			redisCache = redis
+			fmt.Printf("++++++++++++++++: %s\n", redisCache.GetKey("fruits"))
+		}
+
+	} else {
+		fmt.Printf("----------------: %s\n", redisCache.GetKey("fruits"))
 	}
-	// fmt.Printf("----------------: %s\n", redisCache.GetKey("fruits"))
 	return c.String(http.StatusOK, fmt.Sprintf("%s\n%s\n", generateJabber(), cacheText))
 }
 

@@ -46,3 +46,14 @@ func (c *Cache) SetKey(key string, val string) {
 func (c *Cache) AppendKey(key string, val string) {
 	fmt.Println("append key")
 }
+
+func (c *Cache) ListKeys() {
+	keys, err := c.Cli.Do(Ctx, "keys", "*").Result()
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		for _, key := range keys {
+			fmt.Println(key)
+		}
+	}
+}

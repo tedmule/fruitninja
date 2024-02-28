@@ -21,7 +21,6 @@ func init() {
 	// Init Logrus, default to INFO
 	if appConfig.Production {
 		log.SetFormatter(&log.JSONFormatter{})
-
 	} else {
 		log.SetFormatter(&log.TextFormatter{
 			FullTimestamp:   true,
@@ -36,11 +35,12 @@ func init() {
 		logLvl = log.DebugLevel
 	}
 	log.SetLevel(logLvl)
-	// log.SetReportCaller(true)
+	log.SetReportCaller(true)
 }
 
 func main() {
-	redis, err := data.NewRedisClient("localhost:2379")
+	// Connect to Redis at start
+	redis, err := data.NewRedisClient(appConfig.RedisAddr)
 	if err != nil {
 		fmt.Println(err)
 		log.Errorf("Failed to connect to Redis: %s", err.Error())
