@@ -40,9 +40,8 @@ func init() {
 
 func main() {
 	// Connect to Redis at start
-	redis, err := data.NewRedisClient(appConfig.RedisAddr)
+	redis, err := data.NewRedisClient(appConfig.RedisAddr, appConfig.RedisDB)
 	if err != nil {
-		fmt.Println(err)
 		log.Errorf("Failed to connect to Redis: %s", err.Error())
 	}
 	srv := fruitninja.FruitninjaSetup(&appConfig, redis)

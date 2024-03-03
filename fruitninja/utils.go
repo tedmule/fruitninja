@@ -3,9 +3,11 @@ package fruitninja
 import (
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	petname "github.com/dustinkirkland/golang-petname"
 	log "github.com/sirupsen/logrus"
@@ -80,9 +82,31 @@ func getHostname() string {
 	}
 }
 
-func generateJabber() string {
-	name := petname.Generate(fruitNinjaConfig.Length, "_")
-	msg := strings.Repeat(fruitMap[fruitNinjaConfig.Name], fruitNinjaConfig.Count)
+func generatePetName() string {
+	return petname.Generate(fruitNinjaConfig.Length, "_")
+}
 
-	return fmt.Sprintf("%s: %s", name, msg)
+func productFruit(fruitMap map[string]string, randomFruit ...bool) (fruit string) {
+	var isRandom bool
+
+	if len(randomFruit) > 0 {
+		fmt.Println(randomFruit)
+		isRandom = randomFruit[0]
+	}
+
+	// If "isRandom" is true, generate random fruit
+	if isRandom {
+		fruits := make([]string, 0, len(fruitMap))
+		for _, value := range fruitMap {
+			fruits = append(fruits, value)
+		}
+		// Generate random fruit
+		source := rand.NewSource(time.Now().UnixNano())
+		rnd := rand.New(source)
+		fruit = fruits[rnd.Intn(len(fruits))]
+
+	} else {
+		fruit = fruitMap[fruitNinjaConfig.Name]
+	}
+	return
 }

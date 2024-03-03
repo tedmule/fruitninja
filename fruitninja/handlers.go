@@ -121,23 +121,30 @@ func getK8sBladeHandler(c echo.Context) error {
 }
 
 func getJabberHandler(c echo.Context) error {
-	redisCache.ListKeys()
+	var jabberText string
 	var cacheText string
-	if redisCache == nil {
+
+	fruit := productFruit(fruitMap, true)
+
+	if cache == nil {
 		// Try to connect Redis again.
-		cacheText = "Redis: failed to connect to redis"
-		redis, err := data.NewRedisClient(fruitNinjaConfig.RedisAddr)
+		redis, err := data.NewRedisClient(fruitNinjaConfig.RedisAddr, fruitNinjaConfig.RedisDB)
 		if err != nil {
 			log.Errorf("Failed to connect to Redis: %s", err.Error())
+			cacheText = "Redis: failed to connect to redis"
 		} else {
-			redisCache = redis
-			fmt.Printf("++++++++++++++++: %s\n", redisCache.GetKey("fruits"))
+			cache = redis
+			cache.AppendKey("fruits", fruit)
+			cacheText = fmt.Sprintf("Redis: %s\n", cache.GetKey("fruits"))
 		}
-
 	} else {
-		fmt.Printf("----------------: %s\n", redisCache.GetKey("fruits"))
+		cache.AppendKey("fruits", fruit)
+		cacheText = fmt.Sprintf("Redis: %s\n", cache.GetKey("fruits"))
 	}
-	return c.String(http.StatusOK, fmt.Sprintf("%s\n%s\n", generateJabber(), cacheText))
+
+	jabberText = fmt.Sprintf("%s: %s", generatePetName(), strings.Repeat(fruit, fruitNinjaConfig.Count))
+
+	return c.String(http.StatusOK, fmt.Sprintf("%s\n%s\n", jabberText, cacheText))
 }
 
 func wsHandler(c echo.Context) error {
