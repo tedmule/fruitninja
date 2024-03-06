@@ -18,8 +18,8 @@ func getK8SService() []string {
 	// if err != nil {
 	// log.Errorf("Get InClusterConfig Failed: %+v\n", err)
 	k8sConfig = &rest.Config{
-		Host:        fruitNinjaConfig.K8SAPI,
-		BearerToken: fruitNinjaConfig.Token,
+		Host:        fruitNinjaSettings.K8SAPI,
+		BearerToken: fruitNinjaSettings.Token,
 		TLSClientConfig: rest.TLSClientConfig{
 			Insecure: true,
 		},

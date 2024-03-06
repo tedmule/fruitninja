@@ -83,10 +83,10 @@ func getHostname() string {
 }
 
 func generatePetName() string {
-	return petname.Generate(fruitNinjaConfig.Length, "_")
+	return petname.Generate(fruitNinjaSettings.Length, "_")
 }
 
-func productFruit(fruitMap map[string]string, randomFruit ...bool) (fruit string) {
+func produceFruit(fruitMap map[string]string, randomFruit ...bool) (fruit string) {
 	var isRandom bool
 
 	if len(randomFruit) > 0 {
@@ -106,7 +106,7 @@ func productFruit(fruitMap map[string]string, randomFruit ...bool) (fruit string
 		fruit = fruits[rnd.Intn(len(fruits))]
 
 	} else {
-		fruit = fruitMap[fruitNinjaConfig.Name]
+		fruit = fruitMap[fruitNinjaSettings.Name]
 	}
 	return
 }

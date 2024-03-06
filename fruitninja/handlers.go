@@ -22,12 +22,12 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 }
 
 func getK8sFruitHandler(c echo.Context) error {
-	log.Infof("Request for [%s] service\n", fruitNinjaConfig.Name)
+	log.Infof("Request for [%s] service\n", fruitNinjaSettings.Name)
 	url := c.Request().URL.Path
 	log.Debugf("Request URL: %s\n", url)
 
 	if strings.TrimSpace(url) == "/" {
-		msg := strings.Repeat(fruitMap[fruitNinjaConfig.Name], fruitNinjaConfig.Count)
+		msg := strings.Repeat(fruitMap[fruitNinjaSettings.Name], fruitNinjaSettings.Count)
 		return c.String(http.StatusOK, fmt.Sprintf("%s\n", msg))
 	}
 
@@ -37,7 +37,7 @@ func getK8sFruitHandler(c echo.Context) error {
 
 	skewer := []string{}
 	// Append itself to skewer
-	skewer = append(skewer, fruitMap[fruitNinjaConfig.Name])
+	skewer = append(skewer, fruitMap[fruitNinjaSettings.Name])
 	ns := getNamespace()
 
 	var urlRemainder, serviceURL string
@@ -124,25 +124,25 @@ func getJabberHandler(c echo.Context) error {
 	var jabberText string
 	var cacheText string
 
-	fruit := productFruit(fruitMap, true)
+	fruit := produceFruit(fruitMap, true)
 
-	if cache == nil {
+	if fruitNinjaCache == nil {
 		// Try to connect Redis again.
-		redis, err := data.NewRedisClient(fruitNinjaConfig.RedisAddr, fruitNinjaConfig.RedisDB)
+		redis, err := data.NewRedisClient(fruitNinjaSettings.RedisAddr, fruitNinjaSettings.RedisDB)
 		if err != nil {
 			log.Errorf("Failed to connect to Redis: %s", err.Error())
 			cacheText = "Redis: failed to connect to redis"
 		} else {
-			cache = redis
-			cache.AppendKey("fruits", fruit)
-			cacheText = fmt.Sprintf("Redis: %s\n", cache.GetKey("fruits"))
+			fruitNinjaCache = redis
+			fruitNinjaCache.AppendKey("fruits", fruit)
+			cacheText = fmt.Sprintf("Redis: %s\n", fruitNinjaCache.GetKey("fruits"))
 		}
 	} else {
-		cache.AppendKey("fruits", fruit)
-		cacheText = fmt.Sprintf("Redis: %s\n", cache.GetKey("fruits"))
+		fruitNinjaCache.AppendKey("fruits", fruit)
+		cacheText = fmt.Sprintf("Redis: %s\n", fruitNinjaCache.GetKey("fruits"))
 	}
 
-	jabberText = fmt.Sprintf("%s: %s", generatePetName(), strings.Repeat(fruit, fruitNinjaConfig.Count))
+	jabberText = fmt.Sprintf("%s: %s", generatePetName(), strings.Repeat(fruit, fruitNinjaSettings.Count))
 
 	return c.String(http.StatusOK, fmt.Sprintf("%s\n%s\n", jabberText, cacheText))
 }

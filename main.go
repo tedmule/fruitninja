@@ -9,17 +9,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var appConfig fruitninja.FruitNinjaConfig
+var settings fruitninja.FruitNinjaSettings
 
 func init() {
 	//Init config
-	if err := env.Parse(&appConfig); err != nil {
+	if err := env.Parse(&settings); err != nil {
 		fmt.Printf("%+v\n", err)
 	}
-	fmt.Printf("%+v\n", appConfig)
+	fmt.Printf("%+v\n", settings)
 
 	// Init Logrus, default to INFO
-	if appConfig.Production {
+	if settings.Production {
 		log.SetFormatter(&log.JSONFormatter{})
 	} else {
 		log.SetFormatter(&log.TextFormatter{
@@ -29,22 +29,23 @@ func init() {
 
 	}
 	// log.SetFormatter(&log.JSONFormatter{})
-	logLvl, err := log.ParseLevel(appConfig.LogLevel)
+	logLvl, err := log.ParseLevel(settings.LogLevel)
 	if err != nil {
 		// logLvl = log.InfoLevel
 		logLvl = log.DebugLevel
 	}
 	log.SetLevel(logLvl)
-	log.SetReportCaller(true)
+	// log.SetReportCaller(true)
 }
 
 func main() {
 	// Connect to Redis at start
-	redis, err := data.NewRedisClient(appConfig.RedisAddr, appConfig.RedisDB)
+	cache, err := data.NewRedisClient(settings.RedisAddr, settings.RedisDB)
 	if err != nil {
 		log.Errorf("Failed to connect to Redis: %s", err.Error())
 	}
-	srv := fruitninja.FruitninjaSetup(&appConfig, redis)
-	log.Infof("Fruitninja runs in %s mode.", appConfig.Mode)
-	srv.Logger.Fatal(srv.Start(":8080"))
+
+	httpSrv := fruitninja.FruitNinjaSetup(&settings, cache)
+	log.Infof("Fruitninja runs in %s mode.", settings.Mode)
+	httpSrv.Logger.Fatal(httpSrv.Start(":8080"))
 }

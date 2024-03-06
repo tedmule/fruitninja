@@ -8,7 +8,7 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-type FruitNinjaConfig struct {
+type FruitNinjaSettings struct {
 	// Context    string `env:"FRUIT_NINJA_CONTEXT" envDefault:""`
 	Mode          string `env:"FRUIT_NINJA_MODE" envDefault:"default"`
 	Length        int    `env:"FRUIT_NINJA_JABBER_WORD" envDefault:"2"`
@@ -21,20 +21,23 @@ type FruitNinjaConfig struct {
 	RedisAddr     string `env:"FRUIT_NINJA_REDIS_ADDR" envDefault:"localhost:6379"`
 	RedisPassword string `env:"FRUIT_NINJA_REDIS_PSD" envDefault:""`
 	RedisDB       int    `env:"FRUIT_NINJA_REDIS_DB" envDefault:"0"`
+	MySQLHost     string `env:"FRUIT_NINJA_MYSQL_HOST" envDefault:"localhost:3306"`
+	MySQLUsername string `env:"FRUIT_NINJA_MYSQL_USERNAME"`
+	MySQLPassword string `env:"FRUIT_NINJA_MYSQL_PASSWORD"`
+	MySQLDB       string `env:"FRUIT_NINJA_MYSQL_DB"`
 }
 
 var (
 	k8sConfig *rest.Config
 
-	fruitNinjaConfig FruitNinjaConfig
-	cache            *data.Cache
+	fruitNinjaSettings *FruitNinjaSettings
+	fruitNinjaCache    *data.Cache
 )
 
-func FruitninjaSetup(config *FruitNinjaConfig, redis *data.Cache) *echo.Echo {
-	fruitNinjaConfig = *config
-	cache = redis
-
+func FruitNinjaSetup(settings *FruitNinjaSettings, cache *data.Cache) *echo.Echo {
 	e := echo.New()
+	fruitNinjaSettings = settings
+	fruitNinjaCache = cache
 
 	// e.Use(middleware.Logger())
 	// log.SetFormatter(&log.JSONFormatter{})
@@ -59,7 +62,7 @@ func FruitninjaSetup(config *FruitNinjaConfig, redis *data.Cache) *echo.Echo {
 	}))
 
 	// "k8s" mode is used for service mesh demo
-	if config.Mode == "k8s" {
+	if settings.Mode == "k8s" {
 		e.GET("/*", getK8sFruitHandler)
 		e.GET("/blade/:fruits", getK8sBladeHandler)
 

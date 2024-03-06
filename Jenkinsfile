@@ -5,6 +5,8 @@ pipeline {
       agent none
       steps {
         echo 'step 1'
+        sh '''
+        '''
       }
     }
 
