@@ -6,6 +6,7 @@ require (
 	github.com/caarlos0/env/v9 v9.0.0
 	github.com/dustinkirkland/golang-petname v0.0.0-20230626224747-e794b9370d49
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/go-sql-driver/mysql v1.7.1
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/net v0.13.0

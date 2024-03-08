@@ -35,7 +35,6 @@ func NewRedisClient(address string, db int) (*Cache, error) {
 func (c *Cache) GetKey(key string) string {
 	val, err := c.Cli.Get(Ctx, key).Result()
 	if err != nil {
-		fmt.Println(err.Error())
 		log.Error(err.Error())
 		return fmt.Sprintf("Failed to get key(%s)", key)
 	}

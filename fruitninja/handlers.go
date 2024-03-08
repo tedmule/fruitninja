@@ -126,6 +126,7 @@ func getJabberHandler(c echo.Context) error {
 
 	fruit := produceFruit(fruitMap, true)
 
+	// Cache
 	if fruitNinjaCache == nil {
 		// Try to connect Redis again.
 		redis, err := data.NewRedisClient(fruitNinjaSettings.RedisAddr, fruitNinjaSettings.RedisDB)
@@ -140,6 +141,16 @@ func getJabberHandler(c echo.Context) error {
 	} else {
 		fruitNinjaCache.AppendKey("fruits", fruit)
 		cacheText = fmt.Sprintf("Redis: %s\n", fruitNinjaCache.GetKey("fruits"))
+	}
+	log.Debug(fruitNinjaMysql)
+
+	// DB
+	if fruitNinjaMysql != nil {
+		fruits, err := fruitNinjaMysql.GetFruits()
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		fmt.Println(fruits)
 	}
 
 	jabberText = fmt.Sprintf("%s: %s", generatePetName(), strings.Repeat(fruit, fruitNinjaSettings.Count))

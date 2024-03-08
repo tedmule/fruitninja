@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/caarlos0/env/v9"
 	"github.com/daddvted/fruitninja/data"
 	"github.com/daddvted/fruitninja/fruitninja"
@@ -14,9 +12,9 @@ var settings fruitninja.FruitNinjaSettings
 func init() {
 	//Init config
 	if err := env.Parse(&settings); err != nil {
-		fmt.Printf("%+v\n", err)
+		log.Error(err.Error())
 	}
-	fmt.Printf("%+v\n", settings)
+	log.Debugf("%+v\n", settings)
 
 	// Init Logrus, default to INFO
 	if settings.Production {
@@ -35,7 +33,7 @@ func init() {
 		logLvl = log.DebugLevel
 	}
 	log.SetLevel(logLvl)
-	// log.SetReportCaller(true)
+	log.SetReportCaller(true)
 }
 
 func main() {
@@ -45,7 +43,15 @@ func main() {
 		log.Errorf("Failed to connect to Redis: %s", err.Error())
 	}
 
-	httpSrv := fruitninja.FruitNinjaSetup(&settings, cache)
+	// Connect to MySQL at start
+	mysql, err := data.NewMysqlClient(settings.MySQLHost, settings.MySQLUsername, settings.MySQLPassword, settings.MySQLDB)
+	if err != nil {
+		log.Errorf("Failed to connect to MySQL: %s", err.Error())
+	}
+
+	log.Debug(mysql)
+
+	httpSrv := fruitninja.FruitNinjaSetup(&settings, cache, mysql)
 	log.Infof("Fruitninja runs in %s mode.", settings.Mode)
 	httpSrv.Logger.Fatal(httpSrv.Start(":8080"))
 }

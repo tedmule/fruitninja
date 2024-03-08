@@ -1,7 +1,6 @@
 package fruitninja
 
 import (
-	"fmt"
 	"io"
 	"math/rand"
 	"net/http"
@@ -45,7 +44,6 @@ func getMatchedService(name string, services *[]string) (string, bool) {
 func getServingFruit(url string) (string, bool) {
 	resp, err := http.Get(url)
 	if err != nil {
-		// fmt.Printf("%+v\n", err)
 		log.Error(err.Error())
 		return "", false
 	}
@@ -58,7 +56,7 @@ func getServingFruit(url string) (string, bool) {
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Printf("%+v\n", err)
+		log.Error(err.Error())
 	}
 	return string(body), true
 }
@@ -90,7 +88,6 @@ func produceFruit(fruitMap map[string]string, randomFruit ...bool) (fruit string
 	var isRandom bool
 
 	if len(randomFruit) > 0 {
-		fmt.Println(randomFruit)
 		isRandom = randomFruit[0]
 	}
 

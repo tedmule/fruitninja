@@ -22,9 +22,9 @@ type FruitNinjaSettings struct {
 	RedisPassword string `env:"FRUIT_NINJA_REDIS_PSD" envDefault:""`
 	RedisDB       int    `env:"FRUIT_NINJA_REDIS_DB" envDefault:"0"`
 	MySQLHost     string `env:"FRUIT_NINJA_MYSQL_HOST" envDefault:"localhost:3306"`
-	MySQLUsername string `env:"FRUIT_NINJA_MYSQL_USERNAME"`
-	MySQLPassword string `env:"FRUIT_NINJA_MYSQL_PASSWORD"`
-	MySQLDB       string `env:"FRUIT_NINJA_MYSQL_DB"`
+	MySQLUsername string `env:"FRUIT_NINJA_MYSQL_USERNAME" envDefault:"root"`
+	MySQLPassword string `env:"FRUIT_NINJA_MYSQL_PASSWORD" envDefault:"root"`
+	MySQLDB       string `env:"FRUIT_NINJA_MYSQL_DB" envDefault:"fruits"`
 }
 
 var (
@@ -32,12 +32,14 @@ var (
 
 	fruitNinjaSettings *FruitNinjaSettings
 	fruitNinjaCache    *data.Cache
+	fruitNinjaMysql    *data.DB
 )
 
-func FruitNinjaSetup(settings *FruitNinjaSettings, cache *data.Cache) *echo.Echo {
+func FruitNinjaSetup(settings *FruitNinjaSettings, cache *data.Cache, mysql *data.DB) *echo.Echo {
 	e := echo.New()
 	fruitNinjaSettings = settings
 	fruitNinjaCache = cache
+	fruitNinjaMysql = mysql
 
 	// e.Use(middleware.Logger())
 	// log.SetFormatter(&log.JSONFormatter{})
