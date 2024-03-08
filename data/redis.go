@@ -36,7 +36,8 @@ func (c *Cache) GetKey(key string) string {
 	val, err := c.Cli.Get(Ctx, key).Result()
 	if err != nil {
 		log.Error(err.Error())
-		return fmt.Sprintf("Failed to get key(%s)", key)
+		// return fmt.Sprintf("Failed to get key(%s)", key)
+		return err.Error()
 	}
 	return val
 

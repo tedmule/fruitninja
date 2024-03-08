@@ -80,8 +80,12 @@ func getHostname() string {
 	}
 }
 
-func generatePetName() string {
-	return petname.Generate(fruitNinjaSettings.Length, "_")
+func generatePetName(upper bool) string {
+	name := petname.Generate(fruitNinjaSettings.Length, "_")
+	if upper {
+		return strings.ToUpper(name)
+	}
+	return name
 }
 
 func produceFruit(fruitMap map[string]string, randomFruit ...bool) (fruit string) {

@@ -67,30 +67,48 @@ func (db *DB) GetFruits() ([]Fruit, error) {
 	}
 	return fruits, nil
 }
+
+func (db *DB) GetSingleFruit(name string) (Fruit, error) {
+	var fruit Fruit
+	sqlStr := fmt.Sprintf("SELECT * FROM fruit where name='%s'", name)
+	log.Debugf("SQL: %s", sqlStr)
+
+	row := db.Cli.QueryRow(sqlStr)
+	if err := row.Scan(&fruit.ID, &fruit.Name, &fruit.Amount); err != nil {
+		if err == sql.ErrNoRows {
+			return fruit, fmt.Errorf("Fruit %s: not found", name)
+		}
+		return fruit, fmt.Errorf("Fruit %s: %v", name, err)
+	}
+	return fruit, nil
+}
+
+func (db *DB) AddFruit(fruit string) (int64, error) {
+	sql := fmt.Sprintf("INSERT INTO fruit (name, amount) VALUES ('%s', 1)", fruit)
+	log.Debugf("SQL: %s", sql)
+	result, err := db.Cli.Exec(sql)
+	if err != nil {
+		return 0, fmt.Errorf("add fruit: %v", err)
+	}
+	idx, err := result.LastInsertId()
+	log.Debugf("last insert id: %d", idx)
+	if err != nil {
+		return 0, fmt.Errorf("add fruit: %v", err)
+	}
+	return idx, nil
+}
+
 func (db *DB) AddAmount(fruit string) error {
-	sql := fmt.Sprintf("SELECT * FROM fruit where name=%s", fruit)
-	rows, err := db.Cli.Query(sql)
+	sqlStr := fmt.Sprintf("UPDATE fruit SET amount = amount + 1 where name='%s'", fruit)
+	rows, err := db.Cli.Exec(sqlStr)
 	if err != nil {
 		log.Debug(err)
 		return err
 	}
-
-	defer rows.Close()
-
-}
-
-func (db *DB) GetSingleFruit(name string) (Fruit, error) {
-	var fruit Fruit
-
-	sql := fmt.Sprintf("SELECT * FROM fruit where name=%s", name)
-	row := db.Cli.QueryRow(sql)
-	if err := row.Scan(&fruit.ID, &fruit.Name, &fruit.Amount); err != nil {
-		if err == sql.ErrNoRows {
-			return fruit, fmt.Errorf("Fruit %s: not found", fruit)
-		}
-		return fruit, err
+	idx, err := rows.LastInsertId()
+	if err != nil {
+		log.Error(err)
 	}
-
-	return fruit, nil
-
+	log.Debugf("last insert id: %d", idx)
+	return nil
 }

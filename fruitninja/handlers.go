@@ -123,8 +123,9 @@ func getK8sBladeHandler(c echo.Context) error {
 func getJabberHandler(c echo.Context) error {
 	var jabberText string
 	var cacheText string
+	var dbText string
 
-	fruit := produceFruit(fruitMap, true)
+	fruitName := produceFruit(fruitMap, true)
 
 	// Cache
 	if fruitNinjaCache == nil {
@@ -132,30 +133,59 @@ func getJabberHandler(c echo.Context) error {
 		redis, err := data.NewRedisClient(fruitNinjaSettings.RedisAddr, fruitNinjaSettings.RedisDB)
 		if err != nil {
 			log.Errorf("Failed to connect to Redis: %s", err.Error())
-			cacheText = "Redis: failed to connect to redis"
+			cacheText = "Failed to connect to redis"
 		} else {
 			fruitNinjaCache = redis
-			fruitNinjaCache.AppendKey("fruits", fruit)
-			cacheText = fmt.Sprintf("Redis: %s\n", fruitNinjaCache.GetKey("fruits"))
+			fruitNinjaCache.AppendKey("fruits", fruitName)
+			cacheText = fruitNinjaCache.GetKey("fruits")
 		}
 	} else {
-		fruitNinjaCache.AppendKey("fruits", fruit)
-		cacheText = fmt.Sprintf("Redis: %s\n", fruitNinjaCache.GetKey("fruits"))
+		fruitNinjaCache.AppendKey("fruits", fruitName)
+		cacheText = fruitNinjaCache.GetKey("fruits")
 	}
 	log.Debug(fruitNinjaMysql)
 
 	// DB
 	if fruitNinjaMysql != nil {
+		_, err := fruitNinjaMysql.GetSingleFruit(fruitName)
+		if err != nil {
+			log.Error(err)
+			_, err := fruitNinjaMysql.AddFruit(fruitName)
+			if err != nil {
+				log.Error(err)
+			}
+		} else {
+			err := fruitNinjaMysql.AddAmount(fruitName)
+			if err != nil {
+				log.Error(err)
+			}
+		}
+
+		// Query all fruits
 		fruits, err := fruitNinjaMysql.GetFruits()
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Error(err)
+			dbText = err.Error()
+		} else {
+			var text []string
+			for _, fruit := range fruits {
+				text = append(text, fmt.Sprintf("%s: %d", fruit.Name, fruit.Amount))
+			}
+			dbText = strings.Join(text, "\n")
 		}
-		fmt.Println(fruits)
+
+	} else {
+		// re-connect
+		mysql, err := data.NewMysqlClient(fruitNinjaSettings.MySQLHost, fruitNinjaSettings.MySQLUsername, fruitNinjaSettings.MySQLPassword, fruitNinjaSettings.MySQLDB)
+		if err != nil {
+			log.Errorf("Failed to connect to MySQL again: %s", err.Error())
+			dbText = "Failed to connect to MySQL"
+		}
+		fruitNinjaMysql = mysql
 	}
 
-	jabberText = fmt.Sprintf("%s: %s", generatePetName(), strings.Repeat(fruit, fruitNinjaSettings.Count))
-
-	return c.String(http.StatusOK, fmt.Sprintf("%s\n%s\n", jabberText, cacheText))
+	jabberText = fmt.Sprintf("%s: %s", generatePetName(true), strings.Repeat(fruitName, fruitNinjaSettings.Count))
+	return c.String(http.StatusOK, fmt.Sprintf("%s\nCACHE:%s\nDB:\n%s\n", jabberText, cacheText, dbText))
 }
 
 func wsHandler(c echo.Context) error {
