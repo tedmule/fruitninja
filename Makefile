@@ -17,5 +17,5 @@ clean:
 	rm -f ninja
 
 ninja: $(shell find . -type f  -name '*.go')
-	go build -o ninja \
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ninja \
 	  -ldflags '-s -w -X "github.com/daddvted/fruitninja/fruitninja.Version=$(TAG)" -extldflags "-static"'
