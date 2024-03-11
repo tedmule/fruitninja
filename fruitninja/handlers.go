@@ -192,11 +192,11 @@ func getJabberHandler(c echo.Context) error {
 	jabberText = fmt.Sprintf("%s: %s", generatePetName(true), strings.Repeat(fruitName, fruitNinjaSettings.Count))
 
 	if ua.Name == "curl" {
-		version := "--- Version: 0.0 ---"
+		version := fmt.Sprintf("--- Version: %s ---", Version)
 		respText = fmt.Sprintf("%s\n%s\nCACHE:%s\nDB:\n%s\n", version, jabberText, cacheText, dbText)
 		return c.String(http.StatusOK, respText)
 	} else {
-		version := "<h1>Version: 0.0</h1>"
+		version := fmt.Sprintf("<h1>Version: %s</h1>", Version)
 		respText = fmt.Sprintf("%s\n%s<br/>CACHE:%s<br/>DB:<br/>%s<br/>", version, jabberText, cacheText, dbText)
 		return c.HTML(http.StatusOK, respText)
 	}
