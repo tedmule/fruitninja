@@ -9,6 +9,7 @@ import (
 
 	"github.com/daddvted/fruitninja/data"
 	"github.com/labstack/echo/v4"
+	"github.com/mileusna/useragent"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/websocket"
 )
@@ -124,6 +125,10 @@ func getJabberHandler(c echo.Context) error {
 	var jabberText string
 	var cacheText string
 	var dbText string
+	var respText string
+
+	fmt.Println(c.Request().UserAgent())
+	ua := useragent.Parse(c.Request().UserAgent())
 
 	fruitName := produceFruit(fruitMap, true)
 
@@ -185,7 +190,16 @@ func getJabberHandler(c echo.Context) error {
 	}
 
 	jabberText = fmt.Sprintf("%s: %s", generatePetName(true), strings.Repeat(fruitName, fruitNinjaSettings.Count))
-	return c.String(http.StatusOK, fmt.Sprintf("%s\nCACHE:%s\nDB:\n%s\n", jabberText, cacheText, dbText))
+
+	if ua.Name == "curl" {
+		version := "--- Version: 0.0 ---"
+		respText = fmt.Sprintf("%s\n%s\nCACHE:%s\nDB:\n%s\n", version, jabberText, cacheText, dbText)
+		return c.String(http.StatusOK, respText)
+	} else {
+		version := "<h1>Version: 0.0</h1>"
+		respText = fmt.Sprintf("%s\n%s<br/>CACHE:%s<br/>DB:<br/>%s<br/>", version, jabberText, cacheText, dbText)
+		return c.HTML(http.StatusOK, respText)
+	}
 }
 
 func wsHandler(c echo.Context) error {
