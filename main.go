@@ -49,8 +49,6 @@ func main() {
 		log.Errorf("Failed to connect to MySQL: %s", err.Error())
 	}
 
-	log.Debug(mysql)
-
 	httpSrv := fruitninja.FruitNinjaSetup(&settings, cache, mysql)
 	log.Infof("Fruitninja runs in %s mode.", settings.Mode)
 	httpSrv.Logger.Fatal(httpSrv.Start(":8080"))

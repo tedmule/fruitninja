@@ -211,12 +211,14 @@ func wsHandler(c echo.Context) error {
 			err := websocket.Message.Send(ws, msg)
 			if err != nil {
 				log.Error(err)
+				break
 			}
 
 			// Read
 			err = websocket.Message.Receive(ws, &msg)
 			if err != nil {
 				log.Error(err)
+				break
 			}
 			fmt.Printf("received %s from client\n", msg)
 			msg = fruitMap[msg]

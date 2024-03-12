@@ -24,6 +24,7 @@
     function connectWebSocket() {
       var loc = window.location;
       var scheme = 'ws';
+      var isClosed = false;
 
       if (loc.protocol === 'https:') {
         scheme = 'wss';
@@ -38,21 +39,26 @@
 
       ws.onmessage = function(event) {
         var out = document.getElementById('output');
-        out.innerHTML += event.data + '<br>';
+        out.innerHTML += 'Server: ' + event.data + '<br>';
       }
 
       ws.onerror = function(event) {
         console.log("Shit! ws error:", event.data);
       }
       ws.onclose = function(event) {
-        console.log("reconnect:", event)
-        setTimeout(connectWebSocket, 2000);
+        console.log("Closed:", event)
+        // setTimeout(connectWebSocket, 2000);
+        isClosed = true;
       }
 
       setInterval(function() {
-        let fruit = randomChoice(fruits)
-        console.log(`send ${fruit} to server`)
-        ws.send(fruit);
+        if (isClosed != true) {
+          let fruit = randomChoice(fruits)
+          let out = document.getElementById('output');
+          out.innerHTML += 'Client: '+ fruit + '<br>';
+          console.log(`send ${fruit} to server`)
+          ws.send(fruit);
+        }
       }, 1000);
     }
 
