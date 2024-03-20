@@ -202,6 +202,28 @@ func getJabberHandler(c echo.Context) error {
 	}
 }
 
+func getHelloHandler(c echo.Context) error {
+	ua_text := c.Request().Header.Get("User-Agent")
+	ua := useragent.Parse(ua_text)
+
+	fruit := fruitMap[fruitNinjaSettings.Name]
+
+	clientIP := c.RealIP()
+	if ua.IsUnknown() {
+		resp := fmt.Sprintf("Version: \t%s\nYour IP: \t%s\nYou got: \t%s\n", Version, clientIP, fruit)
+		return c.String(http.StatusOK, resp)
+
+	} else {
+		resp := fmt.Sprintf("<p>Version: %s</p><p>Your IP: %s</p><p>You got: <span style='font-size: 30px;'>%s</span></p>", Version, clientIP, fruit)
+		return c.HTML(http.StatusOK, resp)
+	}
+}
+
+func getFruitHandler(c echo.Context) error {
+	fruit := fruitMap[fruitNinjaSettings.Name]
+	return c.String(http.StatusOK, fmt.Sprintf("%s\n", fruit))
+}
+
 func wsHandler(c echo.Context) error {
 	websocket.Handler(func(ws *websocket.Conn) {
 		defer ws.Close()

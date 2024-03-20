@@ -41,6 +41,9 @@ func FruitNinjaSetup(settings *FruitNinjaSettings, cache *data.Cache, mysql *dat
 	fruitNinjaCache = cache
 	fruitNinjaMysql = mysql
 
+	// e.IPExtractor = echo.ExtractIPFromXFFHeader()
+	e.IPExtractor = echo.ExtractIPFromRealIPHeader()
+
 	// e.Use(middleware.Logger())
 	// log.SetFormatter(&log.JSONFormatter{})
 	// log.SetReportCaller(true)
@@ -71,6 +74,8 @@ func FruitNinjaSetup(settings *FruitNinjaSettings, cache *data.Cache, mysql *dat
 	} else {
 		e.File("/", "static/html/index.html")
 		e.GET("/jabber", getJabberHandler)
+		e.GET("/hello", getHelloHandler)
+		e.GET("/fruit", getFruitHandler)
 		e.GET("/ws", wsHandler)
 	}
 

@@ -1,3 +1,3 @@
 package fruitninja
 
-var Version string = "development"
+var Version string = "dev"
