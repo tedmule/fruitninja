@@ -138,7 +138,7 @@ func getJabberHandler(c echo.Context) error {
 		redis, err := data.NewRedisClient(fruitNinjaSettings.RedisAddr, fruitNinjaSettings.RedisDB)
 		if err != nil {
 			log.Errorf("Failed to connect to Redis: %s", err.Error())
-			cacheText = "Failed to connect to redis"
+			cacheText = data.CacheErrorText
 		} else {
 			fruitNinjaCache = redis
 			fruitNinjaCache.AppendKey("fruits", fruitName)
@@ -176,7 +176,7 @@ func getJabberHandler(c echo.Context) error {
 			for _, fruit := range fruits {
 				text = append(text, fmt.Sprintf("%s: %d", fruit.Name, fruit.Amount))
 			}
-			dbText = strings.Join(text, "\n")
+			dbText = fmt.Sprintf("\n%s", strings.Join(text, "\n"))
 		}
 
 	} else {
@@ -193,17 +193,18 @@ func getJabberHandler(c echo.Context) error {
 
 	if ua.Name == "curl" {
 		version := fmt.Sprintf("--- Version: %s ---", Version)
-		respText = fmt.Sprintf("%s\n%s\nCACHE:%s\nDB:\n%s\n", version, jabberText, cacheText, dbText)
+		respText = fmt.Sprintf("%s\n%s\n[CACHE]: %s\n[DB]: %s\n", version, jabberText, cacheText, dbText)
 		return c.String(http.StatusOK, respText)
 	} else {
 		version := fmt.Sprintf("<h1>Version: %s</h1>", Version)
-		respText = fmt.Sprintf("%s\n%s<br/>CACHE:%s<br/>DB:<br/>%s<br/>", version, jabberText, cacheText, dbText)
+		respText = fmt.Sprintf("%s\n%s<br/>[CACHE]: %s<br/>DB:<br/>%s<br/>", version, jabberText, cacheText, dbText)
 		return c.HTML(http.StatusOK, respText)
 	}
 }
 
 func getHelloHandler(c echo.Context) error {
 	ua_text := c.Request().Header.Get("User-Agent")
+	log.Debugf("User-agent: %s\n", ua_text)
 	ua := useragent.Parse(ua_text)
 
 	fruit := fruitMap[fruitNinjaSettings.Name]
@@ -239,10 +240,12 @@ func wsHandler(c echo.Context) error {
 			// Read
 			err = websocket.Message.Receive(ws, &msg)
 			if err != nil {
+				log.Info("connection closed")
 				log.Error(err)
 				break
 			}
-			fmt.Printf("received %s from client\n", msg)
+			// fmt.Printf("received %s from client\n", msg)
+			log.Infof("received %s from client\n", msg)
 			msg = fruitMap[msg]
 		}
 	}).ServeHTTP(c.Response(), c.Request())

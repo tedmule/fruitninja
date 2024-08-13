@@ -19,6 +19,8 @@ type Fruit struct {
 	Amount int
 }
 
+var DbErrorText = "Failed to connect to MySQL"
+
 func NewMysqlClient(address, username, password, dbname string) (*DB, error) {
 	// dsn := fmt.Sprintf("%s:%s@%s/%s", username, password, address, dbname)
 	cfg := mysql.Config{

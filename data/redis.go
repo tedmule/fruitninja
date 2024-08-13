@@ -14,8 +14,9 @@ type Cache struct {
 }
 
 var (
-	ErrNil = errors.New("no record found")
-	Ctx    = context.TODO()
+	ErrNil         = errors.New("no record found")
+	Ctx            = context.TODO()
+	CacheErrorText = "Failed to connect to redis"
 )
 
 func NewRedisClient(address string, db int) (*Cache, error) {
@@ -37,7 +38,7 @@ func (c *Cache) GetKey(key string) string {
 	if err != nil {
 		log.Error(err.Error())
 		// return fmt.Sprintf("Failed to get key(%s)", key)
-		return err.Error()
+		return CacheErrorText
 	}
 	return val
 
@@ -50,8 +51,9 @@ func (c *Cache) AppendKey(key string, val string) {
 	_, err := c.Cli.Append(Ctx, key, val).Result()
 	if err != nil {
 		log.Errorf("Append value(%s) to key(%s) failed\n", val, key)
+	} else {
+		log.Debugf("Append value(%s) to key(%s) successfully\n", val, key)
 	}
-	log.Debugf("Append value(%s) to key(%s) successfully\n", val, key)
 }
 
 func (c *Cache) ListKeys() {
