@@ -197,32 +197,30 @@ func getJabberHandler(c echo.Context) error {
 		return c.String(http.StatusOK, respText)
 	} else {
 		version := fmt.Sprintf("<h1>Version: %s</h1>", Version)
-		respText = fmt.Sprintf("%s\n%s<br/>[CACHE]: %s<br/>DB:<br/>%s<br/>", version, jabberText, cacheText, dbText)
+		respText = fmt.Sprintf("%s\n%s<br/>[CACHE]: %s<br/>[DB]: <br/>%s<br/>", version, jabberText, cacheText, dbText)
 		return c.HTML(http.StatusOK, respText)
 	}
 }
 
-func getHelloHandler(c echo.Context) error {
+func getFruitHandler(c echo.Context) error {
 	ua_text := c.Request().Header.Get("User-Agent")
 	log.Debugf("User-agent: %s\n", ua_text)
 	ua := useragent.Parse(ua_text)
 
 	fruit := fruitMap[fruitNinjaSettings.Name]
 
+	serverIP := getOutboundIP()
+	hostname := getHostname()
+
 	clientIP := c.RealIP()
 	if ua.IsUnknown() {
-		resp := fmt.Sprintf("Version: \t%s\nYour IP: \t%s\nYou got: \t%s\n", Version, clientIP, fruit)
+		resp := fmt.Sprintf("Version: \t%s\nYour IP: \t%s\nYou got: \t%s@%s\n", Version, clientIP, fruit, hostname)
 		return c.String(http.StatusOK, resp)
 
 	} else {
-		resp := fmt.Sprintf("<p>Version: %s</p><p>Your IP: %s</p><p>You got: <span style='font-size: 30px;'>%s</span></p>", Version, clientIP, fruit)
+		resp := fmt.Sprintf("<p>Version: %s</p><p>Client IP: %s</p><p><span style='font-size: 30px;'>%s@%s(%s)</span></p>", Version, clientIP, fruit, hostname, serverIP)
 		return c.HTML(http.StatusOK, resp)
 	}
-}
-
-func getFruitHandler(c echo.Context) error {
-	fruit := fruitMap[fruitNinjaSettings.Name]
-	return c.String(http.StatusOK, fmt.Sprintf("%s\n", fruit))
 }
 
 func wsHandler(c echo.Context) error {

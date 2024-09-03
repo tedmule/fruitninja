@@ -72,11 +72,10 @@ func FruitNinjaSetup(settings *FruitNinjaSettings, cache *data.Cache, mysql *dat
 		e.GET("/blade/:fruits", getK8sBladeHandler)
 
 	} else {
-		e.File("/", "static/html/index.html")
-		e.GET("/jabber", getJabberHandler)
-		e.GET("/hello", getHelloHandler)
-		e.GET("/fruit", getFruitHandler)
+		e.GET("/", getFruitHandler)
+		e.File("/chat", "static/html/index.html")
 		e.GET("/ws", wsHandler)
+		e.GET("/data", getJabberHandler)
 	}
 
 	return e

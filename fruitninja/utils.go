@@ -1,8 +1,10 @@
 package fruitninja
 
 import (
+	"context"
 	"io"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -109,5 +111,26 @@ func produceFruit(fruitMap map[string]string, randomFruit ...bool) (fruit string
 	} else {
 		fruit = fruitMap[fruitNinjaSettings.Name]
 	}
+	return
+}
+
+func getOutboundIP() (ip string) {
+	ip = "ip not found"
+
+	dialer := &net.Dialer{
+		Timeout: 1 * time.Second,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+
+	conn, err := dialer.DialContext(ctx, "udp", "8.8.8.8:80")
+	if err != nil {
+		log.Error(err)
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	ip = localAddr.IP.String()
 	return
 }
