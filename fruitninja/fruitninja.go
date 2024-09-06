@@ -73,6 +73,7 @@ func FruitNinjaSetup(settings *FruitNinjaSettings, cache *data.Cache, mysql *dat
 
 	} else {
 		e.GET("/", getFruitHandler)
+		e.GET("/hello", simpleHandler)
 		e.File("/chat", "static/html/index.html")
 		e.GET("/ws", wsHandler)
 		e.GET("/data", getJabberHandler)

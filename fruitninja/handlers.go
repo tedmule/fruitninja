@@ -223,6 +223,23 @@ func getFruitHandler(c echo.Context) error {
 	}
 }
 
+func simpleHandler(c echo.Context) error {
+	ua_text := c.Request().Header.Get("User-Agent")
+	ua := useragent.Parse(ua_text)
+	hostname := getHostname()
+
+	fruit := fruitMap[fruitNinjaSettings.Name]
+	if ua.IsUnknown() {
+		resp := fmt.Sprintf("%s@%s\n", fruit, hostname)
+		return c.String(http.StatusOK, resp)
+
+	} else {
+		resp := fmt.Sprintf("<p><span style='font-size: 30px;'>%s@%s</span></p>", fruit, hostname)
+		return c.HTML(http.StatusOK, resp)
+	}
+
+}
+
 func wsHandler(c echo.Context) error {
 	websocket.Handler(func(ws *websocket.Conn) {
 		defer ws.Close()
