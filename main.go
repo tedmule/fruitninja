@@ -18,13 +18,18 @@ func init() {
 
 	// Init Logrus, default to INFO
 	if settings.Production {
-		log.SetFormatter(&log.JSONFormatter{})
+		log.SetFormatter(&log.TextFormatter{
+			FullTimestamp:   true,
+			TimestampFormat: "2006-01-02 15:04:05.00000",
+		})
+		// log.SetFormatter(&log.JSONFormatter{})
+		log.SetReportCaller(false)
 	} else {
 		log.SetFormatter(&log.TextFormatter{
 			FullTimestamp:   true,
 			TimestampFormat: "2006-01-02 15:04:05.00000",
 		})
-
+		log.SetReportCaller(true)
 	}
 	// log.SetFormatter(&log.JSONFormatter{})
 	logLvl, err := log.ParseLevel(settings.LogLevel)
@@ -33,7 +38,6 @@ func init() {
 		logLvl = log.DebugLevel
 	}
 	log.SetLevel(logLvl)
-	log.SetReportCaller(true)
 }
 
 func main() {
@@ -51,5 +55,5 @@ func main() {
 
 	httpSrv := fruitninja.FruitNinjaSetup(&settings, cache, mysql)
 	log.Infof("Fruitninja runs in %s mode.", settings.Mode)
-	httpSrv.Logger.Fatal(httpSrv.Start(":8080"))
+	httpSrv.Logger.Fatal(httpSrv.Start(settings.Listen))
 }

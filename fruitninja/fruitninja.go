@@ -11,6 +11,7 @@ import (
 type FruitNinjaSettings struct {
 	// Context    string `env:"FRUIT_NINJA_CONTEXT" envDefault:""`
 	Mode          string `env:"FRUIT_NINJA_MODE" envDefault:"default"`
+	Listen        string `env:"FRUIT_NINJA_LISTEN" envDefault:":8080"`
 	Length        int    `env:"FRUIT_NINJA_JABBER_WORD" envDefault:"2"`
 	Name          string `env:"FRUIT_NINJA_NAME" envDefault:"default"`
 	Count         int    `env:"FRUIT_NINJA_COUNT" envDefault:"1"`
