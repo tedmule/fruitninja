@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mutant-k8s-debug
+  labels:
+    app: mutant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mutant
+  template:
+    metadata:
+      labels:
+        app: mutant
+    spec:
+      containers:
+      - name: mutant-container
+        image: mutant:debug
+        ports:
+        - containerPort: 8443
+        - containerPort: 40000
+        env:
+        - name: MUTANT_MODE
+          value: "incluster"
+        - name: MUTANT_CERT_FILE
+          value: "/build/certs/server.crt"
+        - name: MUTANT_KEY_FILE
+          value: "/build/certs/server.key"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mutant-service
+  labels:
+    app: mutant
+spec:
+  selector:
+    app: mutant
+  ports:
+  - name: https
+    protocol: TCP
+    port: 8443
+    targetPort: 8443
+  - name: custom-port
+    protocol: TCP
+    port: 40000
+    targetPort: 40000
+  type: NodePort

@@ -1,0 +1,15 @@
+FROM golang:1.23.0-alpine AS build
+
+RUN go env -w GOPROXY=https://goproxy.cn,direct && \
+    go install github.com/go-delve/delve/cmd/dlv@latest
+
+# Copy local source
+COPY . /build
+WORKDIR /build
+
+# Build the binary
+RUN CGO_ENABLED=0 go build -o mt
+
+EXPOSE 8443 40000
+
+CMD dlv --listen=:40000 --headless=true --api-version=2 --log exec ./mt

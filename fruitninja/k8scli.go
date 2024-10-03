@@ -3,12 +3,54 @@ package fruitninja
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
+
+type minionk8s struct {
+	client *kubernetes.Clientset
+}
+
+func initMinionK8S(mode string) (*kubernetes.Clientset, error) {
+	client := &kubernetes.Clientset{}
+
+	if mode == "outofcluster" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			home = "~"
+		}
+
+		// Use ~/.kube/config
+		kubeconfig := filepath.Join(home, ".kube", "config")
+		configFromFlags, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+		if err != nil {
+			log.Fatalf("Error building kubeconfig: %s\n", err.Error())
+		}
+
+		client, err = kubernetes.NewForConfig(configFromFlags)
+		if err != nil {
+			log.Fatalf("Error building Kubernetes client: %s\n", err.Error())
+		}
+	}
+	if mode == "incluster" {
+		config, err := rest.InClusterConfig()
+		if err != nil {
+			log.Fatalf("Error building in cluster config: %s\n", err.Error())
+		}
+		client, err := kubernetes.NewForConfig(config)
+		if err != nil {
+			log.Fatalf("Error building Kubernetes client: %s\n", err.Error())
+		}
+		return client, nil
+	}
+	return client, nil
+}
 
 // func getK8SService(namespace string) []string {
 func getK8SService() []string {
