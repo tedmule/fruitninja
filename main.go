@@ -1,59 +1,91 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/caarlos0/env/v9"
 	"github.com/daddvted/fruitninja/data"
 	"github.com/daddvted/fruitninja/fruitninja"
-	log "github.com/sirupsen/logrus"
+
+	// log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var settings fruitninja.FruitNinjaSettings
 
+func createLogger(dev bool, level string) *zap.Logger {
+	enc := "json"
+	if dev {
+		enc = "console"
+	}
+	lvl := zap.NewAtomicLevelAt(zap.InfoLevel)
+	switch level {
+	case "debug":
+		lvl = zap.NewAtomicLevelAt(zap.DebugLevel)
+	case "error":
+		lvl = zap.NewAtomicLevelAt(zap.ErrorLevel)
+	case "warn":
+		lvl = zap.NewAtomicLevelAt(zap.WarnLevel)
+	}
+	encoderCfg := zap.NewProductionEncoderConfig()
+	encoderCfg.TimeKey = "timestamp"
+	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+
+	config := zap.Config{
+		Level:             lvl,
+		Development:       dev,
+		DisableCaller:     false,
+		DisableStacktrace: false,
+		Sampling:          nil,
+		Encoding:          enc,
+		EncoderConfig:     encoderCfg,
+		OutputPaths: []string{
+			"stdout",
+		},
+		ErrorOutputPaths: []string{
+			"stderr",
+		},
+		InitialFields: map[string]interface{}{
+			"pid": os.Getpid(),
+		},
+	}
+
+	return zap.Must(config.Build())
+}
+
 func init() {
 	//Init config
 	if err := env.Parse(&settings); err != nil {
-		log.Error(err.Error())
+		fmt.Printf("Fatal parse settings: %s\n", err.Error())
+		os.Exit(1)
 	}
-	log.Debugf("%+v\n", settings)
+	fmt.Printf("%+v\n", settings)
 
-	// Init Logrus, default to INFO
-	if settings.Production {
-		log.SetFormatter(&log.TextFormatter{
-			FullTimestamp:   true,
-			TimestampFormat: "2006-01-02 15:04:05.00000",
-		})
-		// log.SetFormatter(&log.JSONFormatter{})
-		log.SetReportCaller(false)
-	} else {
-		log.SetFormatter(&log.TextFormatter{
-			FullTimestamp:   true,
-			TimestampFormat: "2006-01-02 15:04:05.00000",
-		})
-		log.SetReportCaller(true)
-	}
-	// log.SetFormatter(&log.JSONFormatter{})
-	logLvl, err := log.ParseLevel(settings.LogLevel)
-	if err != nil {
-		// logLvl = log.InfoLevel
-		logLvl = log.DebugLevel
-	}
-	log.SetLevel(logLvl)
+	// Init zap logger
+	logger := createLogger(settings.Development, settings.LogLevel)
+	defer logger.Sync()
+
+	zap.ReplaceGlobals(logger)
 }
 
 func main() {
+	zap.S().Info("init-------------")
+	zap.S().Debug("init-------------")
 	// Connect to Redis at start
 	cache, err := data.NewRedisClient(settings.RedisAddr, settings.RedisDB)
 	if err != nil {
-		log.Errorf("Failed to connect to Redis: %s", err.Error())
+		zap.S().Errorf("Failed to connect to Redis: %s", err.Error())
 	}
 
 	// Connect to MySQL at start
 	mysql, err := data.NewMysqlClient(settings.MySQLHost, settings.MySQLUsername, settings.MySQLPassword, settings.MySQLDB)
 	if err != nil {
-		log.Errorf("Failed to connect to MySQL: %s", err.Error())
+		zap.S().Errorf("Failed to connect to MySQL: %s", err.Error())
 	}
 
 	httpSrv := fruitninja.FruitNinjaSetup(&settings, cache, mysql)
-	log.Infof("Fruitninja runs in %s mode.", settings.Mode)
+	zap.S().Infof("Fruitninja runs in %s mode.", settings.Mode)
 	httpSrv.Logger.Fatal(httpSrv.Start(settings.Listen))
 }
