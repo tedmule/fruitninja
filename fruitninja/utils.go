@@ -11,7 +11,7 @@ import (
 	"time"
 
 	petname "github.com/dustinkirkland/golang-petname"
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 var fruitMap = map[string]string{
@@ -46,19 +46,19 @@ func getMatchedService(name string, services *[]string) (string, bool) {
 func getServingFruit(url string) (string, bool) {
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Error(err.Error())
+		zap.S().Error(err.Error())
 		return "", false
 	}
 
 	if resp.StatusCode != 200 {
-		log.Info(resp.StatusCode)
+		zap.S().Info(resp.StatusCode)
 		return "", false
 	}
 
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Error(err.Error())
+		zap.S().Error(err.Error())
 	}
 	return string(body), true
 }
@@ -66,7 +66,7 @@ func getServingFruit(url string) (string, bool) {
 func getNamespace() string {
 	namespace, err := os.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
 	if err != nil {
-		log.Error(err.Error())
+		zap.S().Error(err.Error())
 		// Return default namespace when encounting error
 		return "default"
 	}
@@ -126,7 +126,7 @@ func getOutboundIP() (ip string) {
 
 	conn, err := dialer.DialContext(ctx, "udp", "8.8.8.8:80")
 	if err != nil {
-		log.Error(err)
+		zap.S().Error(err)
 	}
 	defer conn.Close()
 

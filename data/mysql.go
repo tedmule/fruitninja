@@ -6,8 +6,7 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
-	_ "github.com/go-sql-driver/mysql"
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 type DB struct {
@@ -31,7 +30,7 @@ func NewMysqlClient(address, username, password, dbname string) (*DB, error) {
 		DBName:               dbname,
 		AllowNativePasswords: true,
 	}
-	log.Debug(cfg.FormatDSN())
+	zap.S().Debug(cfg.FormatDSN())
 	conn, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
 		return nil, err
@@ -73,7 +72,7 @@ func (db *DB) GetFruits() ([]Fruit, error) {
 func (db *DB) GetSingleFruit(name string) (Fruit, error) {
 	var fruit Fruit
 	sqlStr := fmt.Sprintf("SELECT * FROM fruit where name='%s'", name)
-	log.Debugf("SQL: %s", sqlStr)
+	zap.S().Debugf("SQL: %s", sqlStr)
 
 	row := db.Cli.QueryRow(sqlStr)
 	if err := row.Scan(&fruit.ID, &fruit.Name, &fruit.Amount); err != nil {
@@ -87,13 +86,13 @@ func (db *DB) GetSingleFruit(name string) (Fruit, error) {
 
 func (db *DB) AddFruit(fruit string) (int64, error) {
 	sql := fmt.Sprintf("INSERT INTO fruit (name, amount) VALUES ('%s', 1)", fruit)
-	log.Debugf("SQL: %s", sql)
+	zap.S().Debugf("SQL: %s", sql)
 	result, err := db.Cli.Exec(sql)
 	if err != nil {
 		return 0, fmt.Errorf("add fruit: %v", err)
 	}
 	idx, err := result.LastInsertId()
-	log.Debugf("last insert id: %d", idx)
+	zap.S().Debugf("last insert id: %d", idx)
 	if err != nil {
 		return 0, fmt.Errorf("add fruit: %v", err)
 	}
@@ -104,13 +103,13 @@ func (db *DB) AddAmount(fruit string) error {
 	sqlStr := fmt.Sprintf("UPDATE fruit SET amount = amount + 1 where name='%s'", fruit)
 	rows, err := db.Cli.Exec(sqlStr)
 	if err != nil {
-		log.Debug(err)
+		zap.S().Debug(err)
 		return err
 	}
 	idx, err := rows.LastInsertId()
 	if err != nil {
-		log.Error(err)
+		zap.S().Error(err)
 	}
-	log.Debugf("last insert id: %d", idx)
+	zap.S().Debugf("last insert id: %d", idx)
 	return nil
 }

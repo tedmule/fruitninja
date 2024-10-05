@@ -30,7 +30,8 @@
         scheme = 'wss';
       }
 
-      const uri = `${scheme}://${loc.host}${loc.pathname}ws`
+      // const uri = `${scheme}://${loc.host}${loc.pathname}ws`
+      const uri = `${scheme}://${loc.host}/ws`
       ws = new WebSocket(uri)
 
       ws.onopen = function() {

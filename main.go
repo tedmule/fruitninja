@@ -8,7 +8,6 @@ import (
 	"github.com/daddvted/fruitninja/data"
 	"github.com/daddvted/fruitninja/fruitninja"
 
-	// log "github.com/sirupsen/logrus"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -76,8 +75,6 @@ func init() {
 }
 
 func main() {
-	zap.S().Info("init-------------")
-	zap.S().Debug("init-------------")
 	// Connect to Redis at start
 	cache, err := data.NewRedisClient(settings.RedisAddr, settings.RedisDB)
 	if err != nil {
@@ -90,7 +87,11 @@ func main() {
 		zap.S().Errorf("Failed to connect to MySQL: %s", err.Error())
 	}
 
-	httpSrv := fruitninja.FruitNinjaSetup(&settings, cache, mysql)
+	fruit, err := fruitninja.NewFruitninja(&settings, cache, mysql)
+	if err != nil {
+		fmt.Printf("[FATAL] Create Fruitninja error: %s\n", err.Error())
+		os.Exit(1)
+	}
 	zap.S().Infof("Fruitninja runs in %s mode.", settings.Mode)
-	httpSrv.Logger.Fatal(httpSrv.Start(settings.Listen))
+	fruit.Server.Logger.Fatal(fruit.Server.Start(settings.Listen))
 }

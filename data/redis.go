@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/go-redis/redis/v8"
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 type Cache struct {
@@ -36,7 +36,7 @@ func NewRedisClient(address string, db int) (*Cache, error) {
 func (c *Cache) GetKey(key string) string {
 	val, err := c.Cli.Get(Ctx, key).Result()
 	if err != nil {
-		log.Error(err.Error())
+		zap.S().Error(err.Error())
 		// return fmt.Sprintf("Failed to get key(%s)", key)
 		return CacheErrorText
 	}
@@ -50,9 +50,9 @@ func (c *Cache) SetKey(key string, val string) {
 func (c *Cache) AppendKey(key string, val string) {
 	_, err := c.Cli.Append(Ctx, key, val).Result()
 	if err != nil {
-		log.Errorf("Append value(%s) to key(%s) failed\n", val, key)
+		zap.S().Errorf("Append value(%s) to key(%s) failed\n", val, key)
 	} else {
-		log.Debugf("Append value(%s) to key(%s) successfully\n", val, key)
+		zap.S().Debugf("Append value(%s) to key(%s) successfully\n", val, key)
 	}
 }
 
@@ -63,7 +63,7 @@ func (c *Cache) ListKeys() {
 		var err error
 		keys, cursor, err = c.Cli.Scan(Ctx, cursor, "*", 0).Result()
 		if err != nil {
-			log.Error(err.Error())
+			zap.S().Error(err.Error())
 		}
 		for _, key := range keys {
 			fmt.Printf("%s: %s\n", key, c.GetKey(key))

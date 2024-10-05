@@ -10,8 +10,9 @@ import (
 	"github.com/daddvted/fruitninja/data"
 	"github.com/labstack/echo/v4"
 	"github.com/mileusna/useragent"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/websocket"
+
+	"go.uber.org/zap"
 )
 
 type Template struct {
@@ -22,10 +23,10 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-func getK8sFruitHandler(c echo.Context) error {
-	log.Infof("Request for [%s] service\n", fruitNinjaSettings.Name)
+func (fruitninja *FruitNinja) getK8sFruitHandler(c echo.Context) error {
+	zap.S().Infof("Request for [%s] service\n", fruitNinjaSettings.Name)
 	url := c.Request().URL.Path
-	log.Debugf("Request URL: %s\n", url)
+	zap.S().Debugf("Request URL: %s\n", url)
 
 	if strings.TrimSpace(url) == "/" {
 		msg := strings.Repeat(fruitMap[fruitNinjaSettings.Name], fruitNinjaSettings.Count)
@@ -34,7 +35,7 @@ func getK8sFruitHandler(c echo.Context) error {
 
 	splitedURL := strings.SplitN(strings.Trim(url, "/"), "/", 2)
 	serviceLength := len(splitedURL)
-	log.Debugf("Splited URL length: %d\n", serviceLength)
+	zap.S().Debugf("Splited URL length: %d\n", serviceLength)
 
 	skewer := []string{}
 	// Append itself to skewer
@@ -52,9 +53,9 @@ func getK8sFruitHandler(c echo.Context) error {
 			// If serviceLength == 1, no need to append urlRemainder
 			serviceURL = "http://" + nextService + "." + ns + ".svc.cluster.local/"
 		}
-		log.Debugf("Next service: %s\n", nextService)
-		log.Debugf("URL remainder: %s\n", urlRemainder)
-		log.Debugf("Next service url: %s\n", serviceURL)
+		zap.S().Debugf("Next service: %s\n", nextService)
+		zap.S().Debugf("URL remainder: %s\n", urlRemainder)
+		zap.S().Debugf("Next service url: %s\n", serviceURL)
 
 		fruitEmoji, ok := getServingFruit(serviceURL)
 		if ok {
@@ -93,16 +94,16 @@ func getK8sFruitHandler(c echo.Context) error {
 	return c.String(http.StatusOK, fmt.Sprintf("%s\n", bladeString))
 }
 
-func getK8sBladeHandler(c echo.Context) error {
+func (fruitninja *FruitNinja) getK8sBladeHandler(c echo.Context) error {
 	url := c.Request().URL.Path
-	log.Debugf("Request URL: %s\n", url)
+	zap.S().Debugf("Request URL: %s\n", url)
 	queryStr := c.Param("fruits")
-	log.Debugf("Query string: %s\n", queryStr)
+	zap.S().Debugf("Query string: %s\n", queryStr)
 
 	splitedURL := strings.SplitN(strings.Trim(queryStr, "/"), "/", 2)
-	log.Debugf("Splited URL: %q\n", splitedURL)
+	zap.S().Debugf("Splited URL: %q\n", splitedURL)
 	fruitNO := len(splitedURL)
-	log.Debugf("No of fruits: %d\n", fruitNO)
+	zap.S().Debugf("No of fruits: %d\n", fruitNO)
 	ns := getNamespace()
 
 	var serviceURL string
@@ -121,7 +122,7 @@ func getK8sBladeHandler(c echo.Context) error {
 	}
 }
 
-func getJabberHandler(c echo.Context) error {
+func (fruitninja *FruitNinja) getJabberHandler(c echo.Context) error {
 	var jabberText string
 	var cacheText string
 	var dbText string
@@ -137,7 +138,7 @@ func getJabberHandler(c echo.Context) error {
 		// Try to connect Redis again.
 		redis, err := data.NewRedisClient(fruitNinjaSettings.RedisAddr, fruitNinjaSettings.RedisDB)
 		if err != nil {
-			log.Errorf("Failed to connect to Redis: %s", err.Error())
+			zap.S().Errorf("Failed to connect to Redis: %s", err.Error())
 			cacheText = data.CacheErrorText
 		} else {
 			fruitNinjaCache = redis
@@ -148,28 +149,28 @@ func getJabberHandler(c echo.Context) error {
 		fruitNinjaCache.AppendKey("fruits", fruitName)
 		cacheText = fruitNinjaCache.GetKey("fruits")
 	}
-	log.Debug(fruitNinjaMysql)
+	zap.S().Debug(fruitNinjaMysql)
 
 	// DB
 	if fruitNinjaMysql != nil {
 		_, err := fruitNinjaMysql.GetSingleFruit(fruitName)
 		if err != nil {
-			log.Error(err)
+			zap.S().Error(err)
 			_, err := fruitNinjaMysql.AddFruit(fruitName)
 			if err != nil {
-				log.Error(err)
+				zap.S().Error(err)
 			}
 		} else {
 			err := fruitNinjaMysql.AddAmount(fruitName)
 			if err != nil {
-				log.Error(err)
+				zap.S().Error(err)
 			}
 		}
 
 		// Query all fruits
 		fruits, err := fruitNinjaMysql.GetFruits()
 		if err != nil {
-			log.Error(err)
+			zap.S().Error(err)
 			dbText = err.Error()
 		} else {
 			var text []string
@@ -183,7 +184,7 @@ func getJabberHandler(c echo.Context) error {
 		// re-connect
 		mysql, err := data.NewMysqlClient(fruitNinjaSettings.MySQLHost, fruitNinjaSettings.MySQLUsername, fruitNinjaSettings.MySQLPassword, fruitNinjaSettings.MySQLDB)
 		if err != nil {
-			log.Errorf("Failed to connect to MySQL again: %s", err.Error())
+			zap.S().Errorf("Failed to connect to MySQL again: %s", err.Error())
 			dbText = "Failed to connect to MySQL"
 		}
 		fruitNinjaMysql = mysql
@@ -202,12 +203,12 @@ func getJabberHandler(c echo.Context) error {
 	}
 }
 
-func getFruitHandler(c echo.Context) error {
+func (fruitninja *FruitNinja) getFruitHandler(c echo.Context) error {
 	ua_text := c.Request().Header.Get("User-Agent")
-	log.Debugf("User-agent: %s\n", ua_text)
+	zap.S().Debugf("User-agent: %s\n", ua_text)
 	ua := useragent.Parse(ua_text)
 
-	fruit := fruitMap[fruitNinjaSettings.Name]
+	fruit := fruitMap[fruitninja.settings.Name]
 
 	serverIP := getOutboundIP()
 	hostname := getHostname()
@@ -223,12 +224,12 @@ func getFruitHandler(c echo.Context) error {
 	}
 }
 
-func simpleHandler(c echo.Context) error {
+func (fruitninja *FruitNinja) simpleHandler(c echo.Context) error {
 	ua_text := c.Request().Header.Get("User-Agent")
 	ua := useragent.Parse(ua_text)
 	hostname := getHostname()
 
-	fruit := fruitMap[fruitNinjaSettings.Name]
+	fruit := fruitMap[fruitninja.settings.Name]
 	if ua.IsUnknown() {
 		resp := fmt.Sprintf("%s@%s\n", fruit, hostname)
 		return c.String(http.StatusOK, resp)
@@ -237,10 +238,9 @@ func simpleHandler(c echo.Context) error {
 		resp := fmt.Sprintf("<p><span style='font-size: 30px;'>%s@%s</span></p>", fruit, hostname)
 		return c.HTML(http.StatusOK, resp)
 	}
-
 }
 
-func wsHandler(c echo.Context) error {
+func (fruitninja *FruitNinja) wsHandler(c echo.Context) error {
 	websocket.Handler(func(ws *websocket.Conn) {
 		defer ws.Close()
 		msg := "Welcom to FruitNinja"
@@ -248,19 +248,19 @@ func wsHandler(c echo.Context) error {
 			// Write
 			err := websocket.Message.Send(ws, msg)
 			if err != nil {
-				log.Error(err)
+				zap.S().Error(err)
 				break
 			}
 
 			// Read
 			err = websocket.Message.Receive(ws, &msg)
 			if err != nil {
-				log.Info("connection closed")
-				log.Error(err)
+				zap.S().Info("connection closed")
+				zap.S().Error(err)
 				break
 			}
 			// fmt.Printf("received %s from client\n", msg)
-			log.Infof("received %s from client\n", msg)
+			zap.S().Infof("received %s from client\n", msg)
 			msg = fruitMap[msg]
 		}
 	}).ServeHTTP(c.Response(), c.Request())

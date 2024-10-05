@@ -36,11 +36,28 @@ var (
 	fruitNinjaMysql    *data.DB
 )
 
-func FruitNinjaSetup(settings *FruitNinjaSettings, cache *data.Cache, mysql *data.DB) *echo.Echo {
+type FruitNinja struct {
+	settings FruitNinjaSettings
+	Server   *echo.Echo
+	k8s      *kubernetesMinion
+	cache    *data.Cache
+	db       *data.DB
+}
+
+func NewFruitninja(settings *FruitNinjaSettings, cache *data.Cache, db *data.DB) (*FruitNinja, error) {
+	k8sminion, err := newKubernetesMinion(settings)
+	if err != nil {
+		return nil, err
+	}
+
+	fruitninja := &FruitNinja{
+		settings: *settings,
+		cache:    cache,
+		db:       db,
+		k8s:      k8sminion,
+	}
+
 	e := echo.New()
-	fruitNinjaSettings = settings
-	fruitNinjaCache = cache
-	fruitNinjaMysql = mysql
 
 	// e.IPExtractor = echo.ExtractIPFromXFFHeader()
 	e.IPExtractor = echo.ExtractIPFromRealIPHeader()
@@ -69,16 +86,16 @@ func FruitNinjaSetup(settings *FruitNinjaSettings, cache *data.Cache, mysql *dat
 
 	// "k8s" mode is used for service mesh demo
 	if settings.Mode == "k8s" {
-		e.GET("/*", getK8sFruitHandler)
-		e.GET("/blade/:fruits", getK8sBladeHandler)
+		e.GET("/*", fruitninja.getK8sBladeHandler)
+		e.GET("/blade/:fruits", fruitninja.getK8sBladeHandler)
 
 	} else {
-		e.GET("/", getFruitHandler)
-		e.GET("/hello", simpleHandler)
+		e.GET("/", fruitninja.getFruitHandler)
+		e.GET("/hello", fruitninja.simpleHandler)
 		e.File("/chat", "static/html/index.html")
-		e.GET("/ws", wsHandler)
-		e.GET("/data", getJabberHandler)
+		e.GET("/ws", fruitninja.wsHandler)
+		e.GET("/data", fruitninja.getJabberHandler)
 	}
-
-	return e
+	fruitninja.Server = e
+	return fruitninja, nil
 }
