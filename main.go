@@ -16,10 +16,15 @@ import (
 var settings fruitninja.FruitNinjaSettings
 
 func createLogger(dev bool, level string) *zap.Logger {
-	enc := "json"
+	encoding := "json"
+	callerDisabled := true
+	stacktraceDisabled := true
 	if dev {
-		enc = "console"
+		encoding = "console"
+		callerDisabled = false
+		callerDisabled = false
 	}
+	// Set log level to INFO by default
 	lvl := zap.NewAtomicLevelAt(zap.InfoLevel)
 	switch level {
 	case "debug":
@@ -36,10 +41,10 @@ func createLogger(dev bool, level string) *zap.Logger {
 	config := zap.Config{
 		Level:             lvl,
 		Development:       dev,
-		DisableCaller:     false,
-		DisableStacktrace: false,
+		DisableCaller:     callerDisabled,
+		DisableStacktrace: stacktraceDisabled,
 		Sampling:          nil,
-		Encoding:          enc,
+		Encoding:          encoding,
 		EncoderConfig:     encoderCfg,
 		OutputPaths: []string{
 			"stdout",
@@ -58,7 +63,7 @@ func createLogger(dev bool, level string) *zap.Logger {
 func init() {
 	//Init config
 	if err := env.Parse(&settings); err != nil {
-		fmt.Printf("Fatal parse settings: %s\n", err.Error())
+		fmt.Printf("[FATAL] Parse settings error: %s\n", err.Error())
 		os.Exit(1)
 	}
 	fmt.Printf("%+v\n", settings)
