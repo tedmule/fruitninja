@@ -13,6 +13,7 @@ type FruitNinjaSettings struct {
 	Mode          string `env:"FRUIT_NINJA_MODE" envDefault:"default"`
 	Listen        string `env:"FRUIT_NINJA_LISTEN" envDefault:":8080"`
 	Length        int    `env:"FRUIT_NINJA_JABBER_WORD" envDefault:"2"`
+	Sleep         int    `env:"FRUIT_NINJA_SLEEP" envDefault:"0"`
 	Name          string `env:"FRUIT_NINJA_NAME" envDefault:"default"`
 	Count         int    `env:"FRUIT_NINJA_COUNT" envDefault:"1"`
 	LogLevel      string `env:"FRUIT_NINJA_LOG_LEVEL" envDefault:"debug"`

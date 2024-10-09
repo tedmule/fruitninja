@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/daddvted/fruitninja/data"
 	"github.com/labstack/echo/v4"
@@ -225,6 +226,10 @@ func (fruitninja *FruitNinja) getFruitHandler(c echo.Context) error {
 }
 
 func (fruitninja *FruitNinja) simpleHandler(c echo.Context) error {
+	sleep := fruitninja.settings.Sleep
+	if sleep > 0 {
+		time.Sleep(time.Duration(sleep) * time.Second)
+	}
 	ua_text := c.Request().Header.Get("User-Agent")
 	ua := useragent.Parse(ua_text)
 	hostname := getHostname()
