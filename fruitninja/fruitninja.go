@@ -46,6 +46,7 @@ type FruitNinja struct {
 }
 
 func NewFruitninja(settings *FruitNinjaSettings, cache *data.Cache, db *data.DB) (*FruitNinja, error) {
+	fruitNinjaSettings = settings
 	k8sminion, err := newKubernetesMinion(settings)
 	if err != nil {
 		return nil, err
@@ -92,7 +93,7 @@ func NewFruitninja(settings *FruitNinjaSettings, cache *data.Cache, db *data.DB)
 
 	} else {
 		e.GET("/", fruitninja.getFruitHandler)
-		e.GET("/hello", fruitninja.simpleHandler)
+		e.GET("/hello", fruitninja.helloHandler)
 		e.File("/chat", "static/html/index.html")
 		e.GET("/ws", fruitninja.wsHandler)
 		e.GET("/data", fruitninja.getJabberHandler)

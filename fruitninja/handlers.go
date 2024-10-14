@@ -209,8 +209,7 @@ func (fruitninja *FruitNinja) getFruitHandler(c echo.Context) error {
 	zap.S().Debugf("User-agent: %s\n", ua_text)
 	ua := useragent.Parse(ua_text)
 
-	fruit := fruitMap[fruitninja.settings.Name]
-
+	fruit := produceFruit(fruitMap, false)
 	serverIP := getOutboundIP()
 	hostname := getHostname()
 
@@ -225,7 +224,7 @@ func (fruitninja *FruitNinja) getFruitHandler(c echo.Context) error {
 	}
 }
 
-func (fruitninja *FruitNinja) simpleHandler(c echo.Context) error {
+func (fruitninja *FruitNinja) helloHandler(c echo.Context) error {
 	sleep := fruitninja.settings.Sleep
 	if sleep > 0 {
 		time.Sleep(time.Duration(sleep) * time.Second)
@@ -233,8 +232,8 @@ func (fruitninja *FruitNinja) simpleHandler(c echo.Context) error {
 	ua_text := c.Request().Header.Get("User-Agent")
 	ua := useragent.Parse(ua_text)
 	hostname := getHostname()
+	fruit := produceFruit(fruitMap, false)
 
-	fruit := fruitMap[fruitninja.settings.Name]
 	if ua.IsUnknown() {
 		resp := fmt.Sprintf("%s@%s\n", fruit, hostname)
 		return c.String(http.StatusOK, resp)

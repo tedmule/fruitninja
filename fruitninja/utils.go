@@ -90,12 +90,11 @@ func generatePetName(upper bool) string {
 	return name
 }
 
-func produceFruit(fruitMap map[string]string, randomFruit ...bool) (fruit string) {
-	var isRandom bool
-
-	if len(randomFruit) > 0 {
-		isRandom = randomFruit[0]
-	}
+func produceFruit(fruitMap map[string]string, isRandom bool) (fruit string) {
+	// var isRandom bool
+	// if len(randomFruit) > 0 {
+	// 	isRandom = randomFruit[0]
+	// }
 
 	// If "isRandom" is true, generate random fruit
 	if isRandom {
@@ -109,7 +108,8 @@ func produceFruit(fruitMap map[string]string, randomFruit ...bool) (fruit string
 		fruit = fruits[rnd.Intn(len(fruits))]
 
 	} else {
-		fruit = fruitMap[fruitNinjaSettings.Name]
+		name := fruitMap[fruitNinjaSettings.Name]
+		fruit = strings.Repeat(name, fruitNinjaSettings.Count)
 	}
 	return
 }
