@@ -247,7 +247,7 @@ func (fruitninja *FruitNinja) helloHandler(c echo.Context) error {
 func (fruitninja *FruitNinja) wsHandler(c echo.Context) error {
 	websocket.Handler(func(ws *websocket.Conn) {
 		defer ws.Close()
-		msg := "Welcom to FruitNinja"
+		msg := "Welcome to FruitNinja"
 		for {
 			// Write
 			err := websocket.Message.Send(ws, msg)

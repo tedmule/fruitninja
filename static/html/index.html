@@ -7,7 +7,8 @@
 </head>
 
 <body>
-  <p id="output"></p>
+  <p id="message"></p>
+  <p id="summary"></p>
 
   <script>
     const fruits = [
@@ -16,9 +17,22 @@
 	    "strawberry", "tomato", "watermelon", "blade"
     ]
 
+    var dict = {}
+
     function randomChoice(list) {
       const randomIndex = Math.floor(Math.random() * list.length)
       return list[randomIndex]
+    }
+
+    function updateDict(key) {
+      if (key.toLowerCase().startsWith('welcome')) {
+        return;
+      }
+      if (dict[key]) {
+        dict[key] += 1;
+      } else {
+        dict[key] = 1;
+      }
     }
 
     function connectWebSocket() {
@@ -40,7 +54,8 @@
 
       ws.onmessage = function(event) {
         var out = document.getElementById('output');
-        out.innerHTML += 'Server: ' + event.data + '<br>';
+        console.log(`got ${event.data} `);
+        updateDict(event.data);
       }
 
       ws.onerror = function(event) {
@@ -55,9 +70,16 @@
       setInterval(function() {
         if (isClosed != true) {
           let fruit = randomChoice(fruits)
-          let out = document.getElementById('output');
-          out.innerHTML += 'Client: '+ fruit + '<br>';
+          // 
+          // updateDict(fruit);
+          let message = document.getElementById('message');
+          let summary = document.getElementById('summary')
+          summary.innerHTML = Object.entries(dict)
+                              .map(([key, value]) => `${key}: ${value}`)
+                              .join('<br/> ');
+          message.innerHTML = 'Client send: '+ fruit;
           console.log(`send ${fruit} to server`)
+
           ws.send(fruit);
         }
       }, 1000);
