@@ -215,7 +215,7 @@ func (fruitninja *FruitNinja) getFruitHandler(c echo.Context) error {
 
 	clientIP := c.RealIP()
 	if ua.IsUnknown() {
-		resp := fmt.Sprintf("Version: \t%s\nYour IP: \t%s\nYou got: \t%s@%s\n", Version, clientIP, fruit, hostname)
+		resp := fmt.Sprintf("Version: \t%s\nClient IP: \t%s\n%s@%s\n", Version, clientIP, fruit, hostname)
 		return c.String(http.StatusOK, resp)
 
 	} else {
@@ -263,8 +263,7 @@ func (fruitninja *FruitNinja) wsHandler(c echo.Context) error {
 				zap.S().Error(err)
 				break
 			}
-			// fmt.Printf("received %s from client\n", msg)
-			zap.S().Infof("received %s from client\n", msg)
+			zap.S().Infof("received %s from client", msg)
 			msg = fruitMap[msg]
 		}
 	}).ServeHTTP(c.Response(), c.Request())
