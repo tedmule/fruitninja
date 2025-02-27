@@ -92,11 +92,11 @@ func NewFruitninja(settings *FruitNinjaSettings, cache *data.Cache, db *data.DB)
 		e.GET("/blade/:fruits", fruitninja.getK8sBladeHandler)
 
 	} else {
-		e.GET("/", fruitninja.getFruitHandler)
-		e.GET("/hello", fruitninja.helloHandler)
-		e.File("/chat", "static/html/index.html")
+		e.GET("/", fruitninja.helloHandler)
+		e.GET("/hello", fruitninja.indexHandler)
+		e.File("/chat", "static/html/chat.html")
 		e.GET("/ws", fruitninja.wsHandler)
-		e.GET("/data", fruitninja.getJabberHandler)
+		e.GET("/data", fruitninja.getDataHandler)
 	}
 	fruitninja.Server = e
 	return fruitninja, nil

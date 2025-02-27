@@ -123,7 +123,7 @@ func (fruitninja *FruitNinja) getK8sBladeHandler(c echo.Context) error {
 	}
 }
 
-func (fruitninja *FruitNinja) getJabberHandler(c echo.Context) error {
+func (fruitninja *FruitNinja) getDataHandler(c echo.Context) error {
 	var jabberText string
 	var cacheText string
 	var dbText string
@@ -204,7 +204,7 @@ func (fruitninja *FruitNinja) getJabberHandler(c echo.Context) error {
 	}
 }
 
-func (fruitninja *FruitNinja) getFruitHandler(c echo.Context) error {
+func (fruitninja *FruitNinja) indexHandler(c echo.Context) error {
 	ua_text := c.Request().Header.Get("User-Agent")
 	zap.S().Debugf("User-agent: %s\n", ua_text)
 	ua := useragent.Parse(ua_text)
