@@ -1,4 +1,4 @@
-FROM 192.168.6.99/docker/alpine:3.9
+FROM 192.168.6.99/library/alpine:3.9
 #FROM alpine:3.9
 LABEL MAINTAINER="Ted <daddvted@gmail.com>"
 
