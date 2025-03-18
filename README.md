@@ -1,8 +1,8 @@
 Fruitninja is a blah (still working on)
 
 # Environment
-* **FRUIT_NINJA_NAME**: Fruit name for HTTP response(apple, banana, ...)
-* **FRUIT_NINJA_COUNT**: Number of fruit for HTTP response
+* **FN_NAME**: Fruit name for HTTP response(apple, banana, ...)
+* **FN_COUNT**: Number of fruit for HTTP response
 
 # Dev
 Use air to reload
