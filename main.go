@@ -1,7 +1,9 @@
 package main
 
 import (
+	"embed"
 	"fmt"
+	"io/fs"
 	"os"
 
 	"github.com/caarlos0/env/v9"
@@ -13,6 +15,9 @@ import (
 )
 
 var settings fruitninja.FruitNinjaSettings
+
+//go:embed static/*
+var staticFiles embed.FS
 
 func createLogger(dev bool, level string) *zap.Logger {
 	encoding := "json"
@@ -87,7 +92,9 @@ func main() {
 		zap.S().Errorf("Failed to connect to MySQL: %s", err.Error())
 	}
 
-	fruit, err := fruitninja.NewFruitninja(&settings, cache, mysql)
+	embedFS, _ := fs.Sub(staticFiles, "static")
+
+	fruit, err := fruitninja.NewFruitninja(&settings, cache, mysql, embedFS)
 	if err != nil {
 		fmt.Printf("[FATAL] Create Fruitninja error: %s\n", err.Error())
 		os.Exit(1)

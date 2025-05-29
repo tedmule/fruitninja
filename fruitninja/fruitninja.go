@@ -1,6 +1,9 @@
 package fruitninja
 
 import (
+	"io/fs"
+	"net/http"
+
 	"github.com/daddvted/fruitninja/data"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -45,7 +48,7 @@ type FruitNinja struct {
 	db       *data.DB
 }
 
-func NewFruitninja(settings *FruitNinjaSettings, cache *data.Cache, db *data.DB) (*FruitNinja, error) {
+func NewFruitninja(settings *FruitNinjaSettings, cache *data.Cache, db *data.DB, static fs.FS) (*FruitNinja, error) {
 	fruitNinjaSettings = settings
 	k8sminion, err := newKubernetesMinion(settings)
 	if err != nil {
@@ -94,7 +97,7 @@ func NewFruitninja(settings *FruitNinjaSettings, cache *data.Cache, db *data.DB)
 	} else {
 		e.GET("/", fruitninja.helloHandler)
 		e.GET("/hello", fruitninja.indexHandler)
-		e.File("/chat", "static/html/chat.html")
+		e.GET("/html/*", echo.WrapHandler(http.StripPrefix("/html/", http.FileServer(http.FS(static)))))
 		e.GET("/ws", fruitninja.wsHandler)
 		e.GET("/data", fruitninja.getDataHandler)
 	}
